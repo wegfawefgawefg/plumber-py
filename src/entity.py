@@ -26,4 +26,4 @@ class Entity:
         self.acc = glm.vec2(0, 0)
         self.input_controlled = False
         self.display_state = DisplayState.IDLE
-        self.sprite = None
+        self.sprite_animator = None

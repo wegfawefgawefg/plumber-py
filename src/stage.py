@@ -1,7 +1,11 @@
+import copy
 from pprint import pprint
 
 import glm
-from tiles import Tiles
+from entity import DisplayState, Entity, EntityType
+from sprites.sprite_animator import SpriteAnimator
+from sprites.sprite_definitions import PLAYER_STANDING, SpriteFamily
+from tiles import TILE_SIZE, Tiles
 
 
 class Stage:
@@ -52,6 +56,24 @@ t = fill_with_air(64, 16)
 t = floor(t, 2)
 t = put_a_win_tile(t)
 STAGE_ONE.set_tiles(t)
+
+player = Entity()
+player.type = EntityType.PLAYER
+player.pos = glm.vec2(4 * TILE_SIZE, 2 * TILE_SIZE)
+player.size = glm.vec2(TILE_SIZE, TILE_SIZE)
+player.vel = glm.vec2(0, 0)
+player.acc = glm.vec2(0, 0)
+player.input_controlled = (True,)
+player.display_state = DisplayState.IDLE
+player.sprite_animator = SpriteAnimator(
+    SpriteFamily.PLAYER,
+    PLAYER_STANDING,
+)
+player_2 = copy.deepcopy(player)
+player_2.pos.x += TILE_SIZE * 10
+
+STAGE_ONE.set_entities([player, player_2])
+
 
 if __name__ == "__main__":
     pprint(STAGE_ONE.tiles)

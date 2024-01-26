@@ -8,7 +8,7 @@ from tiles import TILE_SIZE, get_tile_texture_sample_position
 
 def render_playing(state, graphics):
     render_tiles(state, graphics)
-    # render_entites(state, graphics)
+    render_entites(state, graphics)
     render_ui(state, graphics)
 
 
@@ -47,6 +47,36 @@ def render_tiles(state, graphics):
                 (render_pos.x, render_pos.y, TILE_SIZE, TILE_SIZE),
                 (sample_pos.x, sample_pos.y, TILE_SIZE, TILE_SIZE),
             )
+
+
+def render_entites(state, graphics):
+    cam = graphics.camera
+    tl = cam.pos
+    br = cam.pos + cam.size
+
+    entities_texture = graphics.assets.get(Textures.ENTITIES)
+    for entity in state.entities:
+        entity_tl = entity.pos
+        entity_br = entity.pos + entity.size
+
+        if entity_br.x < tl.x or entity_tl.x > br.x:
+            continue
+        if entity_br.y < tl.y or entity_tl.y > br.y:
+            continue
+
+        sprite_animator = entity.sprite_animator
+        frame_num = sprite_animator.get_current_frame()
+        sample_position = sprite_animator.sprite.get_frame_pos(frame_num)
+        sample_size = sprite_animator.sprite.get_frame_size(frame_num)
+        render_offset = sprite_animator.get_frame_offset()
+
+        render_pos = entity.pos + render_offset - cam.pos
+
+        graphics.render_surface.blit(
+            entities_texture,
+            (render_pos.x, render_pos.y, entity.size.x, entity.size.y),
+            (sample_position.x, sample_position.y, sample_size.x, sample_size.y),
+        )
 
 
 def mouse_pos(graphics):
