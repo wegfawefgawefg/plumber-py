@@ -1,4 +1,6 @@
 from pprint import pprint
+
+import glm
 from tiles import Tiles
 
 
@@ -9,16 +11,16 @@ class Stage:
         self.tiles = None
 
     def set_tiles(self, tiles):
-        self.dims = (len(tiles), len(tiles[0]))
+        self.dims = glm.vec2(len(tiles[0]), len(tiles))
         self.tiles = tiles
 
     def set_entities(self, entities):
         self.entities = entities
 
     def get_tile(self, x, y):
-        if x < 0 or x >= self.dims[0]:
+        if x < 0 or x >= self.dims.x:
             return None
-        if y < 0 or y >= self.dims[1]:
+        if y < 0 or y >= self.dims.y:
             return None
         return self.tiles[y][x]
 
@@ -39,7 +41,17 @@ def floor(tiles, height):
     return tiles
 
 
-STAGE_ONE.set_tiles(floor(fill_with_air(16, 16), 2))
+def put_a_win_tile(tiles):
+    x = len(tiles[0]) - 2
+    y = len(tiles) - 3
+    tiles[y][x] = Tiles.WIN
+    return tiles
+
+
+t = fill_with_air(64, 16)
+t = floor(t, 2)
+t = put_a_win_tile(t)
+STAGE_ONE.set_tiles(t)
 
 if __name__ == "__main__":
     pprint(STAGE_ONE.tiles)
