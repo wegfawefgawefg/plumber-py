@@ -3,15 +3,21 @@ import pygame
 from state import Mode
 import systems
 from systems.control import center_cam_on_player, control_camera, control_entities
-from systems.physics import physics_post_step, physics_pre_step, physics_step
+from systems.physics import (
+    gravity,
+    physics_post_step,
+    set_grounded,
+    zero_accelerations,
+)
 
 
 def step_playing(state, graphics):
     # control_camera(state, graphics)
-    physics_pre_step(state)
+    zero_accelerations(state)
+    gravity(state)
+    set_grounded(state)
 
     control_entities(state)
-    physics_step(state)
     physics_post_step(state)
 
     center_cam_on_player(state, graphics)

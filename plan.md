@@ -1,21 +1,21 @@
 <!-- - setup boilerplate -->
-- basic game loop
+<!-- - basic game loop -->
 
-- graphics struct
-- sound struct
+<!-- - graphics struct -->
+<!-- - sound struct -->
+<!-- - loud sound assets -->
+<!-- - load pics -->
+<!-- - level tile data -->
+<!-- - tile draw -->
+<!-- - controls -->
 
+- animations
 
 
 
 
 - sound event queue
-- loud sound assets
 - particle effects
 - event queue
-- load pics
-- level tile data
-- tile draw
-- controls
 - tile collisions 
 - (pull in rtree)
-- animations

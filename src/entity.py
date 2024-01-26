@@ -1,6 +1,8 @@
 from enum import Enum, auto
 import glm
 
+from tiles import TILE_SIZE
+
 
 class EntityType(Enum):
     PLAYER = auto()
@@ -27,3 +29,28 @@ class Entity:
         self.input_controlled = False
         self.display_state = DisplayState.IDLE
         self.sprite_animator = None
+
+
+###################### UTILS ######################
+
+
+def get_entity_bounds(pos, size):
+    tl = pos
+    br = pos + size - glm.vec2(1, 1)
+    return tl, br
+
+
+def get_entity_feet(pos, size):
+    entity_tl, entity_br = get_entity_bounds(pos, size)
+    feet_tl = glm.vec2(entity_tl.x, entity_br.y)
+    feet_br = entity_br + glm.vec2(0, 1)
+    return feet_tl, feet_br
+
+
+def get_tiles_at_feet(pos, size, state):
+    feet_tl, feet_br = get_entity_feet(pos, size)
+    # get tiles in player bounds
+    feet_tl_tile_pos = feet_tl / TILE_SIZE
+    feet_br_tile_pos = feet_br / TILE_SIZE
+    tiles_at_feet = state.stage.get_tiles_in_rect(feet_tl_tile_pos, feet_br_tile_pos)
+    return tiles_at_feet

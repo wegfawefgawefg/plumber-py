@@ -28,6 +28,57 @@ class Stage:
             return None
         return self.tiles[y][x]
 
+    def get_tiles_in_rect(self, tl, br) -> list:
+        # /** returns all the tiles in a given search rectangle: defined by top_left and bottom_right positions
+        # * search rectangle is inclusive and should be in tile coordinates
+        # * cannot fail. coords are clamped to stage boundaries. a search rectangle that is completely outside the stage will return an empty vector
+        # */
+
+        # if search rect is completely outside the stage, return an empty vector
+        #  dont need to check less than zero, (top left corner case) because unsigned ints cant be negative
+        if tl.x > self.dims.x or tl.y > self.dims.y:
+            return []
+
+        # in case search rect partially outside stage, clamp coords
+        tl = glm.ivec2(
+            max(0, tl.x),
+            max(0, tl.y),
+        )
+        br = glm.ivec2(
+            min(self.dims.x, br.x),
+            min(self.dims.y, br.y),
+        )
+
+        tiles = []
+        for y in range(tl.y, br.y + 1):
+            for x in range(tl.x, br.x + 1):
+                tiles.append(self.get_tile(x, y))
+        return tiles
+
+    def get_tile_coord_pairs_in_rect(self, tl, br) -> list:
+        # /** just like get_tiles_in_rect, but also returns coords */
+        # if search rect is completely outside the stage, return an empty vector
+        if tl.x > self.dims.x or tl.y > self.dims.y:
+            return []
+
+        # in case search rect partially outside stage, clamp coords
+        tl = glm.ivec2(
+            max(0, tl.x),
+            max(0, tl.y),
+        )
+        br = glm.ivec2(
+            min(self.dims.x, br.x),
+            min(self.dims.y, br.y),
+        )
+
+        tile_coord_pairs = []
+        for y in range(tl.y, br.y + 1):
+            for x in range(tl.x, br.x + 1):
+                tile = self.get_tile(x, y)
+                coord = glm.uvec2(x, y)
+                tile_coord_pairs.append((tile, coord))
+        return tile_coord_pairs
+
 
 STAGE_ONE = Stage()
 
@@ -69,10 +120,11 @@ player.sprite_animator = SpriteAnimator(
     SpriteFamily.PLAYER,
     PLAYER_STANDING,
 )
-player_2 = copy.deepcopy(player)
-player_2.pos.x += TILE_SIZE * 10
+# player_2 = copy.deepcopy(player)
+# player_2.pos.x += TILE_SIZE * 10
 
-STAGE_ONE.set_entities([player, player_2])
+STAGE_ONE.set_entities([player])
+# STAGE_ONE.set_entities([player, player_2])
 
 
 if __name__ == "__main__":

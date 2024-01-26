@@ -12,7 +12,7 @@ class Tiles(Enum):
     SPIKES = auto()
 
 
-def is_collidable(tile):
+def is_tile_collidable(tile):
     match tile:
         case Tiles.AIR:
             return False
@@ -34,3 +34,11 @@ def get_tile_texture_sample_position(tile) -> glm.uvec2:
             return glm.uvec2(0, 9)
         case Tiles.SPIKES:
             return glm.uvec2(0, 6)
+
+
+def collidable_tile_in_list(tiles):
+    for tile in tiles:
+        collided = is_tile_collidable(tile)
+        if collided:
+            return True
+    return False
