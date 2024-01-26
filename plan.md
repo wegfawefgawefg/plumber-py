@@ -8,14 +8,18 @@
 <!-- - level tile data -->
 <!-- - tile draw -->
 <!-- - controls -->
+<!-- - tile collisions  -->
 
 - animations
-
+- message queue
+- fix sprite render offset 
+- check cam position
+- is cam centered
 
 
 
 - sound event queue
 - particle effects
-- event queue
-- tile collisions 
 - (pull in rtree)
+
+- event queue

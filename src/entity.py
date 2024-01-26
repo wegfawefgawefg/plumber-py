@@ -19,6 +19,11 @@ class DisplayState(Enum):
     DEAD = auto()
 
 
+class Facing(Enum):
+    LEFT = auto()
+    RIGHT = auto()
+
+
 class Entity:
     def __init__(self) -> None:
         self.type = None
@@ -29,6 +34,8 @@ class Entity:
         self.input_controlled = False
         self.display_state = DisplayState.IDLE
         self.sprite_animator = None
+        self.no_gravity = False
+        self.facing = Facing.RIGHT
 
 
 ###################### UTILS ######################

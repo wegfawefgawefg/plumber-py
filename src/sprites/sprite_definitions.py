@@ -19,7 +19,7 @@ PLAYER_STANDING = SeriallyStoredAnimatedSprite(
     Textures.ENTITIES,
     glm.vec2(0, 0),
     glm.vec2(16, 16),
-    glm.vec2(0, 0),
+    glm.vec2(-4, -4),
     2,
     True,
 )

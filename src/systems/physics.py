@@ -1,4 +1,9 @@
 import glm
+from collisions import (
+    do_collisions_horizontal,
+    do_collisions_vertical,
+)
+from entity import get_entity_bounds
 
 from tiles import TILE_SIZE, collidable_tile_in_list
 
@@ -9,6 +14,12 @@ def zero_accelerations(state):
 
 
 MAX_SPEED = 9.0
+
+
+def ground_friction(state):
+    for e in state.entities:
+        if e.grounded:
+            e.vel.x *= 0.8
 
 
 def physics_post_step(state):
@@ -25,63 +36,32 @@ def physics_post_step(state):
         elif e.vel.y < -MAX_SPEED:
             e.vel.y = -MAX_SPEED
 
-        # tile collisions
+        # collisions
+        #   # horizontal
+        new_pos = do_collisions_vertical(state, e, e.pos, e.size, e.vel)
+        if new_pos != None:
+            e.pos.y = new_pos
+            e.vel.y = 0.0
+        else:
+            e.pos.y += e.vel.y
 
-        e.pos += e.vel
+        #   # horizontal
+        new_pos = do_collisions_horizontal(state, e, e.pos, e.size, e.vel)
+        if new_pos != None:
+            e.pos.x = new_pos
+            e.vel.x = 0.0
+        else:
+            e.pos.x += e.vel.x
 
 
-GRAVITY = 0.01
+GRAVITY = 0.3
 
 
 def gravity(state):
     for e in state.entities:
+        if e.no_gravity:
+            continue
         e.acc.y += GRAVITY
-
-
-# pub fn set_grounded(ecs: &mut World, state: &State) {
-#     // remove grounded from all entities with it
-#     let currently_grounded: Vec<Entity> = ecs
-#         .query::<&Grounded>()
-#         .iter()
-#         .map(|(entity, _)| entity)
-#         .collect();
-#     for entity in currently_grounded {
-#         let _ = ecs.remove_one::<Grounded>(entity);
-#     }
-#     ecs.flush();
-
-#     // find who is grounded
-#     let mut newly_grounded: Vec<Entity> = vec![];
-#     for (entity, (ctransform, shape)) in ecs.query::<(&CTransform, &Shape)>().iter() {
-#         let (feet_tl, feet_br) = get_entity_feet(ctransform.pos, shape.size);
-
-#         // check stage floor
-#         if feet_br.y >= state.stage.get_height() as i32 {
-#             newly_grounded.push(entity);
-#             continue;
-#         }
-
-#         // get tiles in player bounds
-#         let feet_tl_tile_pos = feet_tl / Tile::SIZE as i32;
-#         let feet_br_tile_pos = feet_br / Tile::SIZE as i32;
-#         let tiles_at_feet = state
-#             .stage
-#             .get_tiles_in_rect(&feet_tl_tile_pos, &feet_br_tile_pos);
-#         let collided = collidable_tile_in_list(&tiles_at_feet);
-#         if collided {
-#             newly_grounded.push(entity);
-#         }
-#     }
-
-#     // set grounded for grounded entities
-#     for entity in newly_grounded {
-#         let _ = ecs.insert(entity, (Grounded,));
-#     }
-
-#     for (_, physics) in ecs.query::<&mut Physics>().with::<&Grounded>().iter() {
-#         physics.vel.y = 0.0;
-#     }
-# }
 
 
 def set_grounded(state):
@@ -91,11 +71,13 @@ def set_grounded(state):
 
     # find who is grounded
     for e in state.entities:
-        feet_tl = e.pos
-        feet_br = e.pos + e.size
+        entity_tl, entity_br = get_entity_bounds(e.pos, e.size)
+
+        feet_tl = glm.vec2(entity_tl.x, entity_br.y)
+        feet_br = entity_br + glm.vec2(0, 1)
 
         # check stage floor
-        if feet_br.y >= state.stage.dims.y:
+        if feet_br.y >= state.stage.wc_dims.y:
             e.grounded = True
             continue
 
@@ -109,4 +91,3 @@ def set_grounded(state):
         if collided:
             e.grounded = True
             e.vel.y = 0.0
-            print("grounded")

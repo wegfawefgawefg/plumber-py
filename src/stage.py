@@ -1,5 +1,6 @@
 import copy
 from pprint import pprint
+import random
 
 import glm
 from entity import DisplayState, Entity, EntityType
@@ -8,18 +9,34 @@ from sprites.sprite_definitions import PLAYER_STANDING, SpriteFamily
 from tiles import TILE_SIZE, Tiles
 
 
+class TileCoordPair:
+    def __init__(self, tile, coord):
+        self.tile = tile
+        self.coord = coord
+
+
 class Stage:
     def __init__(self):
+        self.wc_dims = None
         self.dims = None
         self.entities = []
         self.tiles = None
 
     def set_tiles(self, tiles):
         self.dims = glm.vec2(len(tiles[0]), len(tiles))
+        self.wc_dims = self.dims * TILE_SIZE
         self.tiles = tiles
 
     def set_entities(self, entities):
         self.entities = entities
+
+    def get_height(self):
+        """Returns the height of the stage in world coordinates"""
+        return self.wc_dims.y
+
+    def get_width(self):
+        """Returns the width of the stage in world coordinates"""
+        return self.wc_dims.x
 
     def get_tile(self, x, y):
         if x < 0 or x >= self.dims.x:
@@ -55,7 +72,7 @@ class Stage:
                 tiles.append(self.get_tile(x, y))
         return tiles
 
-    def get_tile_coord_pairs_in_rect(self, tl, br) -> list:
+    def get_tile_coord_pairs_in_rect(self, tl, br) -> list[TileCoordPair]:
         # /** just like get_tiles_in_rect, but also returns coords */
         # if search rect is completely outside the stage, return an empty vector
         if tl.x > self.dims.x or tl.y > self.dims.y:
@@ -76,7 +93,7 @@ class Stage:
             for x in range(tl.x, br.x + 1):
                 tile = self.get_tile(x, y)
                 coord = glm.uvec2(x, y)
-                tile_coord_pairs.append((tile, coord))
+                tile_coord_pairs.append(TileCoordPair(tile, coord))
         return tile_coord_pairs
 
 
@@ -103,15 +120,25 @@ def put_a_win_tile(tiles):
     return tiles
 
 
+def random_bumps(tiles, height, chance):
+    # all the way across, a chance to put a block
+    for c in range(len(tiles[0])):
+        if random.random() < chance:
+            tiles[height][c] = Tiles.BRICK
+    return tiles
+
+
 t = fill_with_air(64, 16)
 t = floor(t, 2)
 t = put_a_win_tile(t)
+t = random_bumps(t, 13, 0.1)
+t = random_bumps(t, 10, 0.1)
 STAGE_ONE.set_tiles(t)
 
 player = Entity()
 player.type = EntityType.PLAYER
 player.pos = glm.vec2(4 * TILE_SIZE, 2 * TILE_SIZE)
-player.size = glm.vec2(TILE_SIZE, TILE_SIZE)
+player.size = glm.vec2(8, 12)
 player.vel = glm.vec2(0, 0)
 player.acc = glm.vec2(0, 0)
 player.input_controlled = (True,)
@@ -120,12 +147,12 @@ player.sprite_animator = SpriteAnimator(
     SpriteFamily.PLAYER,
     PLAYER_STANDING,
 )
-# player_2 = copy.deepcopy(player)
-# player_2.pos.x += TILE_SIZE * 10
+player.sprite_animator.frame_duration = 12
 
 STAGE_ONE.set_entities([player])
-# STAGE_ONE.set_entities([player, player_2])
-
+# player_2 = copy.deepcopy(player)
+# player_2.pos.x += TILE_SIZE * 10
+# STAGE_ONE.entities.append(player_2)
 
 if __name__ == "__main__":
     pprint(STAGE_ONE.tiles)

@@ -1,5 +1,6 @@
 import pygame
 import glm
+from entity import Facing
 from graphics import Textures
 
 from state import Mode
@@ -8,8 +9,27 @@ from tiles import TILE_SIZE, get_tile_texture_sample_position
 
 def render_playing(state, graphics):
     render_tiles(state, graphics)
+    render_crosshair(state, graphics)
     render_entites(state, graphics)
     render_ui(state, graphics)
+
+
+def render_crosshair(state, graphics):
+    # draw a line down the middle of the screen
+    pygame.draw.line(
+        graphics.render_surface,
+        (255, 0, 0),
+        (graphics.render_resolution.x / 2, 0),
+        (graphics.render_resolution.x / 2, graphics.render_resolution.y),
+    )
+
+    # now horizontally
+    pygame.draw.line(
+        graphics.render_surface,
+        (255, 0, 0),
+        (0, graphics.render_resolution.y / 2),
+        (graphics.render_resolution.x, graphics.render_resolution.y / 2),
+    )
 
 
 def render_pause(state, graphics):
@@ -27,10 +47,10 @@ def render(state, graphics):
 def render_tiles(state, graphics):
     cam = graphics.camera
     tl = cam.pos
-    br = cam.pos + cam.size
+    br = tl + cam.size
 
-    tl_tile = tl / TILE_SIZE
-    br_tile = br / TILE_SIZE
+    tl_tile = tl // TILE_SIZE
+    br_tile = br // TILE_SIZE
 
     tiles_texture = graphics.assets.get(Textures.TILES)
     for y in range(int(tl_tile.y), int(br_tile.y + 2)):
@@ -64,19 +84,63 @@ def render_entites(state, graphics):
         if entity_br.y < tl.y or entity_tl.y > br.y:
             continue
 
+        # render the entity box
+        pygame.draw.rect(
+            graphics.render_surface,
+            (255, 0, 0),
+            (
+                entity.pos.x - cam.pos.x,
+                entity.pos.y - cam.pos.y,
+                entity.size.x,
+                entity.size.y,
+            ),
+            1,
+        )
+
         sprite_animator = entity.sprite_animator
         frame_num = sprite_animator.get_current_frame()
         sample_position = sprite_animator.sprite.get_frame_pos(frame_num)
         sample_size = sprite_animator.sprite.get_frame_size(frame_num)
         render_offset = sprite_animator.get_frame_offset()
 
-        render_pos = entity.pos + render_offset - cam.pos
-
-        graphics.render_surface.blit(
+        # sample the entity texture into a surface
+        sample_surface = pygame.Surface(sample_size.to_tuple(), pygame.SRCALPHA)
+        sample_surface.blit(
             entities_texture,
-            (render_pos.x, render_pos.y, entity.size.x, entity.size.y),
+            (0, 0, sample_size.x, sample_size.y),
             (sample_position.x, sample_position.y, sample_size.x, sample_size.y),
         )
+        # flip the surface if the entity is facing right
+        if entity.facing == Facing.RIGHT:
+            sample_surface = pygame.transform.flip(sample_surface, True, False)
+            # invert render offset
+
+            render_pos = entity.pos + render_offset - cam.pos
+            render_offset = glm.vec2(render_offset.x, render_offset.y)
+
+        render_pos = entity.pos + render_offset - cam.pos
+
+        # blit the surface to the render surface
+        graphics.render_surface.blit(
+            sample_surface,
+            (render_pos.x, render_pos.y, sample_size.x, sample_size.y),
+        )
+
+    # render a fake entity as the origin line
+    origin_tile_pos = glm.vec2(0, 12)
+    origin_pos = origin_tile_pos * TILE_SIZE - cam.pos
+    pygame.draw.line(
+        graphics.render_surface,
+        (0, 255, 0),
+        (origin_pos.x, origin_pos.y),
+        (origin_pos.x + 8, origin_pos.y),
+    )
+    pygame.draw.line(
+        graphics.render_surface,
+        (0, 255, 0),
+        (origin_pos.x, origin_pos.y),
+        (origin_pos.x, origin_pos.y + 8),
+    )
 
 
 def mouse_pos(graphics):
@@ -88,19 +152,23 @@ def mouse_pos(graphics):
 
 
 def render_ui(state, graphics):
-    angle = pygame.time.get_ticks() / 1000
+    pygame.draw.circle(graphics.render_surface, (0, 255, 0), mouse_pos(graphics), 3)
 
-    rect_size = glm.vec2(16, 16)
-    center = graphics.render_resolution / 2
-    rect_pos = center - rect_size / 2 + glm.vec2(32, 32)
 
-    for i in range(3):
-        rot = glm.rotate(glm.vec2(0.0, 1.0), angle + i * 90)
-        rect_pos_rotated = rot @ (rect_pos - center) + rect_pos
-        pygame.draw.rect(
-            graphics.render_surface,
-            (255, 0, 0),
-            (rect_pos_rotated.to_tuple(), rect_size.to_tuple()),
-        )
+def meta_render(state, graphics):
+    render_debug_messages(state, graphics)
 
-    pygame.draw.circle(graphics.render_surface, (0, 255, 0), mouse_pos(graphics), 10)
+
+def render_debug_messages(state, graphics):
+    state.debug_messages.sort()
+
+    cursor = glm.vec2(0, 0)
+    for string in state.debug_messages:
+        text = string
+        color = (255, 255, 255)
+        font = pygame.font.SysFont("Arial", 16)
+
+        font_surface = font.render(text, True, color)
+        graphics.window.blit(font_surface, cursor.to_tuple())
+
+        cursor.y += font.get_height()

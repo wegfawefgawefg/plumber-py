@@ -1,3 +1,4 @@
+import copy
 import glm
 from sprites.sprite import Sprite
 
@@ -33,7 +34,7 @@ class SeriallyStoredAnimatedSprite(Sprite):
             frame_num < self.num_frames
         ), f"Invalid frame_num: {frame_num}. Total frames: {self.get_num_frames()}"
 
-        pos = self.sample_position
+        pos = copy.deepcopy(self.sample_position)
         pos.x += frame_num * self.size.x
         return pos
 

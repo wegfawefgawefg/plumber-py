@@ -3,7 +3,7 @@ import pygame
 import glm
 from process_inputs import process_inputs
 
-from render import render
+from render import meta_render, render, render_debug_messages
 from graphics import Graphics
 from stage import STAGE_ONE
 from state import State
@@ -20,8 +20,10 @@ def main():
 
     state.load_stage(STAGE_ONE)
 
+    clock = pygame.time.Clock()
     running = True
     while running:
+        clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (
                 event.type == pygame.KEYDOWN
@@ -30,11 +32,15 @@ def main():
                 running = False
 
         process_inputs(state)
+        state.meta_step()
         step(state, graphics)
 
         graphics.render_surface.fill((0, 0, 0))
         render(state, graphics)
         graphics.blit_render_surface_to_window()
+        meta_render(state, graphics)
+
+        pygame.display.update()
 
     pygame.quit()
 

@@ -13,8 +13,11 @@ class Camera:
         self.pos = glm.vec2(0, 0)
         self.size = size
 
-    def center(self, pos):
+    def set_center(self, pos):
         self.pos = pos - self.size / 2
+
+    def get_center(self):
+        return self.pos + self.size / 2
 
 
 class Graphics:
@@ -22,14 +25,12 @@ class Graphics:
         self.render_resolution = glm.vec2(240, 160)
         self.window_size = self.render_resolution * 4
         self.camera = Camera(glm.vec2(16 * TILE_SIZE, 9 * TILE_SIZE))
-        self.camera.center(glm.vec2(8 * TILE_SIZE, 10 * TILE_SIZE))
+        self.camera.set_center(glm.vec2(8 * TILE_SIZE, 10 * TILE_SIZE))
 
         self.window = pygame.display.set_mode(self.window_size.to_tuple())
         self.render_surface = pygame.Surface(self.render_resolution.to_tuple())
 
         pygame.display.set_caption("Plumber")
-
-        # ASSETS
 
         self.assets = AssetCache()
 
@@ -38,7 +39,6 @@ class Graphics:
             self.render_surface, self.window_size
         )
         self.window.blit(stretched_surface, (0, 0))
-        pygame.display.update()
 
 
 @loader(pygame.image.load, path="assets/graphics/")
