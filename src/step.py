@@ -4,7 +4,7 @@ from render import mouse_pos
 
 from state import Mode
 import systems
-from systems.animations import set_facing, step_sprite_animators
+from systems.animations import set_facing, step_sprite_animators, update_display_states
 from systems.control import (
     center_cam_on_player,
     control_camera,
@@ -24,6 +24,7 @@ def step_playing(state, graphics):
     # control_camera(state, graphics)
     step_sprite_animators(state)
     set_facing(state)
+    update_display_states(state)
     zero_accelerations(state)
     gravity(state)
     set_grounded(state)

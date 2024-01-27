@@ -29,12 +29,13 @@ PLAYER_STANDING = SeriallyStoredAnimatedSprite(
 
 PLAYER_WALKING = SeriallyStoredAnimatedSprite(
     Textures.ENTITIES,
-    glm.vec2(32, 16),
+    glm.vec2(32, 0),
     glm.vec2(16, 16),
-    glm.vec2(0, 0),
+    glm.vec2(-4, -4),
     2,
     True,
 )
+
 
 PLAYER_DEAD = SeriallyStoredAnimatedSprite(
     Textures.ENTITIES,
@@ -85,38 +86,41 @@ def get_sprite_for_display_state_given_family(
     match family:
         case SpriteFamily.PLAYER:
             match display_state:
-                case DisplayState.Neutral:
+                case DisplayState.NEUTRAL:
                     return PLAYER_STANDING
-                case DisplayState.Walk:
+                case DisplayState.WALKING:
                     return PLAYER_WALKING
-                case DisplayState.Dead:
-                    return PLAYER_DEAD
-                case DisplayState.Stunned:
-                    return PLAYER_STUNNED
-                case DisplayState.Falling:
+                case DisplayState.FALLING:
                     return PLAYER_FALLING
-                case DisplayState.Climbing:
+                case DisplayState.CLIMBING:
                     return PLAYER_CLIMBING
+                case DisplayState.STUNNED:
+                    return PLAYER_STUNNED
+                case DisplayState.DEAD:
+                    return PLAYER_DEAD
 
 
 ###################################################################################
 ##########################    DECORATIONS STUFF            ########################
 ###################################################################################
 # ////////////////////////   DECORATION SPRITE DEFINITIONS ////////////////////////
-FLOWER = StaticSprite(
+FLOWER = SeriallyStoredAnimatedSprite(
     Textures.DECORATIONS,
     glm.vec2(0, 0),
     glm.vec2(16, 16),
+    glm.vec2(0, 0),
+    2,
+    True,
 )
 
 MINI_HILL = StaticSprite(
     Textures.DECORATIONS,
-    glm.vec2(16, 0),
+    glm.vec2(0, 16),
     glm.vec2(16, 16),
 )
 
 BIG_PIPE = StaticSprite(
     Textures.DECORATIONS,
-    glm.vec2(32, 0),
+    glm.vec2(16, 16),
     glm.vec2(32, 32),
 )

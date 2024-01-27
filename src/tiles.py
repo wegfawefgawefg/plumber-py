@@ -7,12 +7,13 @@ TILE_SIZE = 16
 
 class Tile(Enum):
     AIR = auto()
-    BRICK = auto()
+    CAPPED_DIRT = auto()
+    DIRT = auto()
     EXIT = auto()
     SPIKES = auto()
 
 
-COLLIDEABLE_TILES = set((Tile.BRICK,))
+COLLIDEABLE_TILES = set((Tile.CAPPED_DIRT, Tile.DIRT))
 
 
 def is_tile_collidable(tile):
@@ -32,7 +33,8 @@ def is_tile_transparent(tile):
 
 TILE_TEXTURE_SAMPLE_POSITIONS = {
     Tile.AIR: glm.uvec2(0, 0),
-    Tile.BRICK: glm.uvec2(0, 1),
+    Tile.CAPPED_DIRT: glm.uvec2(0, 1),
+    Tile.DIRT: glm.uvec2(1, 1),
     Tile.EXIT: glm.uvec2(0, 9),
     Tile.SPIKES: glm.uvec2(0, 6),
 }

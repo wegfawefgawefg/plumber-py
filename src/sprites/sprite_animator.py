@@ -9,10 +9,14 @@ from sprites.sprite_definitions import (
 )
 
 
-DEFAULT_FRAME_DURATION = 4  # animation changes every 4 frames
+DEFAULT_FRAME_DURATION = 8  # animation changes every 4 frames
 
 
 class SpriteAnimator:
+    """This is a class that holds a sprite and animates it. It is used by entities.
+    It has routing for families and display states, which are like the nodes in a state machine.
+    """
+
     def __init__(self, sprite_family: SpriteFamily, sprite: Sprite):
         self.sprite_family = sprite_family
         self.sprite = sprite
@@ -67,6 +71,8 @@ class SpriteAnimator:
 
 
 class BasicSpriteAnimator:
+    """Doesn't have sprite families or display states, just a single sprite."""
+
     def __init__(self, sprite: Sprite):
         self.sprite = sprite
         self.current_frame = 0

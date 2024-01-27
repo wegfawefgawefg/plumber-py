@@ -9,8 +9,10 @@ from tiles import TILE_SIZE, get_tile_texture_sample_position
 
 def render_playing(state, graphics):
     render_tiles(state, graphics)
-    render_crosshair(state, graphics)
+    render_background_decorations(state, graphics)
+    # render_crosshair(state, graphics)
     render_entites(state, graphics)
+    render_foreground_decorations(state, graphics)
     render_ui(state, graphics)
 
 
@@ -69,6 +71,44 @@ def render_tiles(state, graphics):
             )
 
 
+def render_background_decorations(state, graphics):
+    render_decorations(state, graphics, state.stage.background_decorations)
+
+
+def render_foreground_decorations(state, graphics):
+    render_decorations(state, graphics, state.stage.foreground_decorations)
+
+
+def render_decorations(state, graphics, decorations):
+    cam = graphics.camera
+    tl = cam.pos
+    br = tl + cam.size
+
+    decorations_texture = graphics.assets.get(Textures.DECORATIONS)
+    for decoration in decorations:
+        sprite_animator = decoration.sprite_animator
+        frame_num = sprite_animator.get_current_frame()
+        sample_pos = sprite_animator.sprite.get_frame_pos(frame_num)
+        sample_size = sprite_animator.sprite.get_frame_size(frame_num)
+        render_offset = sprite_animator.get_frame_offset()
+
+        decoration_tl = decoration.pos
+        decoration_br = decoration.pos + sample_size
+
+        if decoration_br.x < tl.x or decoration_tl.x > br.x:
+            continue
+        if decoration_br.y < tl.y or decoration_tl.y > br.y:
+            continue
+
+        render_pos = decoration.pos + render_offset - cam.pos
+
+        graphics.render_surface.blit(
+            decorations_texture,
+            (render_pos.x, render_pos.y, sample_size.x, sample_size.y),
+            (sample_pos.x, sample_pos.y, sample_size.x, sample_size.y),
+        )
+
+
 def render_entites(state, graphics):
     cam = graphics.camera
     tl = cam.pos
@@ -85,17 +125,17 @@ def render_entites(state, graphics):
             continue
 
         # render the entity box
-        pygame.draw.rect(
-            graphics.render_surface,
-            (255, 0, 0),
-            (
-                entity.pos.x - cam.pos.x,
-                entity.pos.y - cam.pos.y,
-                entity.size.x,
-                entity.size.y,
-            ),
-            1,
-        )
+        # pygame.draw.rect(
+        #     graphics.render_surface,
+        #     (255, 0, 0),
+        #     (
+        #         entity.pos.x - cam.pos.x,
+        #         entity.pos.y - cam.pos.y,
+        #         entity.size.x,
+        #         entity.size.y,
+        #     ),
+        #     1,
+        # )
 
         sprite_animator = entity.sprite_animator
         frame_num = sprite_animator.get_current_frame()

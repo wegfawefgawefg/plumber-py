@@ -1,7 +1,19 @@
+from enum import Enum, auto
 import random
 from stage import Exit
 from stages.stages import Stages
 from tiles import Tile
+
+
+class ForegroundOrBackground(Enum):
+    FOREGROUND = auto()
+    BACKGROUND = auto()
+
+
+def foreground_or_background():
+    if random.random() < 0.5:
+        return ForegroundOrBackground.FOREGROUND
+    return ForegroundOrBackground.BACKGROUND
 
 
 def blit_tiles(source: [[Tile]], destination: [[Tile]], pos):
@@ -34,12 +46,15 @@ def fill_area_with(tiles, tl, br, tile):
     return tiles
 
 
-def floor(tiles, height, tile):
+def floor(tiles, height, cap_tile, tile):
     cieling_height = len(tiles)
     h_i = cieling_height - height
     for h in range(h_i, 10):
         for c, col in enumerate(tiles[h]):
-            tiles[h][c] = tile
+            if h == h_i:
+                tiles[h][c] = cap_tile
+            else:
+                tiles[h][c] = tile
     return tiles
 
 
@@ -49,3 +64,41 @@ def random_bumps(tiles, height, tile, chance):
         if random.random() < chance:
             tiles[height][c] = tile
     return tiles
+
+
+_tile_key_ = {
+    "a": Tile.AIR,
+    "b": Tile.DIRT,
+    "c": Tile.CAPPED_DIRT,
+    "p": Tile.PIPE,
+    "t": Tile.PIPE_TOP,
+    "s": Tile.BLOCK,
+    "q": Tile.COIN_BLOCK,
+}
+_tiles_ = """
+# intro area
+bcaaaaaaaa
+bcasaaaaaa
+bcaasaaaaa
+bcaaasaaaa
+bcaaaasaaa
+bcaaasaaaa
+bcaasaaaaa
+bcasaaaaaa
+bcaaaaaaaa
+"""
+
+
+def parse_map_tiles_string(map_tiles_string):
+    # we need to 2d array of tiles
+    # probably have build it column by column then transpose it
+
+    columns = []
+    for line in map_tiles_string.split("\n"):
+        col = []
+        if line == "":
+            continue
+        if line[0] == "#":
+            continue
+        for c in line:
+            col.append(_tile_key_[c])

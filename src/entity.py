@@ -10,11 +10,11 @@ class EntityType(Enum):
 
 
 class DisplayState(Enum):
-    IDLE = auto()
+    NEUTRAL = auto()
     WALKING = auto()
-    RUNNING = auto()
     JUMPING = auto()
     FALLING = auto()
+    CLIMBING = auto()
     STUNNED = auto()
     DEAD = auto()
 
@@ -32,10 +32,13 @@ class Entity:
         self.vel = glm.vec2(0, 0)
         self.acc = glm.vec2(0, 0)
         self.input_controlled = False
-        self.display_state = DisplayState.IDLE
+        self.display_state = DisplayState.NEUTRAL
         self.sprite_animator = None
         self.no_gravity = False
         self.facing = Facing.RIGHT
+
+        self.stun_timer = 0
+        self.hp = 1
 
         # optional components
         self.coyote_timer = None

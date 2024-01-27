@@ -14,12 +14,11 @@ def player_template():
     player.vel = glm.vec2(0, 0)
     player.acc = glm.vec2(0, 0)
     player.input_controlled = (True,)
-    player.display_state = DisplayState.IDLE
+    player.display_state = DisplayState.NEUTRAL
     player.sprite_animator = SpriteAnimator(
         SpriteFamily.PLAYER,
         PLAYER_STANDING,
     )
-    player.sprite_animator.frame_duration = 12
 
     player.coyote_timer = CoyoteTimer(6)
     return player
