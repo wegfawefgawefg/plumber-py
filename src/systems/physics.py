@@ -16,12 +16,6 @@ def zero_accelerations(state):
 MAX_SPEED = 9.0
 
 
-def ground_friction(state):
-    for e in state.entities:
-        if e.grounded:
-            e.vel.x *= 0.8
-
-
 def physics_post_step(state):
     for e in state.entities:
         e.vel += e.acc

@@ -5,7 +5,7 @@ from process_inputs import process_inputs
 
 from render import meta_render, render, render_debug_messages
 from graphics import Graphics
-from stage import STAGE_ONE
+from stages.a_a import a_a
 from state import State
 from audio import Audio
 from step import step
@@ -18,7 +18,7 @@ def main():
     graphics = Graphics()
     audio = Audio()
 
-    state.load_stage(STAGE_ONE)
+    state.load_stage(a_a())
 
     clock = pygame.time.Clock()
     running = True

@@ -37,6 +37,9 @@ class Entity:
         self.no_gravity = False
         self.facing = Facing.RIGHT
 
+        # optional components
+        self.coyote_timer = None
+
 
 ###################### UTILS ######################
 

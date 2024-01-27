@@ -1,5 +1,6 @@
 import pygame
 from entity import EntityType
+from render import mouse_pos
 
 from state import Mode
 import systems
@@ -9,10 +10,10 @@ from systems.control import (
     control_camera,
     control_entities,
     speed_limit_controlled_entities,
+    step_coyote_timers,
 )
 from systems.physics import (
     gravity,
-    ground_friction,
     physics_post_step,
     set_grounded,
     zero_accelerations,
@@ -26,7 +27,7 @@ def step_playing(state, graphics):
     zero_accelerations(state)
     gravity(state)
     set_grounded(state)
-    # ground_friction(state)
+    step_coyote_timers(state)
 
     control_entities(state)
     speed_limit_controlled_entities(state)
@@ -56,6 +57,17 @@ def some_debug_messages(state, graphics):
 
     # player vel
     state.debug_messages.append(f"player vel: {player.vel}")
+
+    # print coyote timer
+    if len(player_entities) > 0:
+        player = player_entities[0]
+        state.debug_messages.append(f"coyote timer: {player.coyote_timer.timer}")
+
+    # print player grounded
+    state.debug_messages.append(f"player grounded: {player.grounded}")
+
+    # print mouse pos
+    state.debug_messages.append(f"mouse pos: {mouse_pos(graphics)}")
 
 
 def step_pause(state, graphics):

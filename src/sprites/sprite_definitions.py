@@ -8,7 +8,10 @@ from sprites.serially_stored_animated_sprite import SeriallyStoredAnimatedSprite
 from sprites.sprite import Sprite
 from sprites.static_sprite import StaticSprite
 
-# ////////////////////////    SPRITE DEFINITIONS    ////////////////////////
+###################################################################################
+##########################    ENTITY STUFF                 ########################
+###################################################################################
+# ////////////////////////    ENTITY SPRITE DEFINITIONS    ////////////////////////
 DEFAULT = StaticSprite(
     Textures.ENTITIES,
     glm.vec2(0, 48),
@@ -70,7 +73,7 @@ PLAYER_FALLING = SeriallyStoredAnimatedSprite(
 )
 
 
-# ////////////////////////    SPRITE FAMILIES    ////////////////////////
+# ////////////////////////    ENTITY SPRITE FAMILIES    ////////////////////////
 class SpriteFamily(Enum):
     PLAYER = auto()
     BAT = auto()
@@ -94,3 +97,26 @@ def get_sprite_for_display_state_given_family(
                     return PLAYER_FALLING
                 case DisplayState.Climbing:
                     return PLAYER_CLIMBING
+
+
+###################################################################################
+##########################    DECORATIONS STUFF            ########################
+###################################################################################
+# ////////////////////////   DECORATION SPRITE DEFINITIONS ////////////////////////
+FLOWER = StaticSprite(
+    Textures.DECORATIONS,
+    glm.vec2(0, 0),
+    glm.vec2(16, 16),
+)
+
+MINI_HILL = StaticSprite(
+    Textures.DECORATIONS,
+    glm.vec2(16, 0),
+    glm.vec2(16, 16),
+)
+
+BIG_PIPE = StaticSprite(
+    Textures.DECORATIONS,
+    glm.vec2(32, 0),
+    glm.vec2(32, 32),
+)

@@ -64,3 +64,45 @@ class SpriteAnimator:
             self.current_frame += 1
             if self.current_frame >= self.sprite.get_num_frames():
                 self.current_frame = 0
+
+
+class BasicSpriteAnimator:
+    def __init__(self, sprite: Sprite):
+        self.sprite = sprite
+        self.current_frame = 0
+        self.countdown_timer = DEFAULT_FRAME_DURATION
+        self.frame_duration = DEFAULT_FRAME_DURATION
+
+    def get_current_frame(self) -> int:
+        return self.current_frame
+
+    def get_frame_offset(self) -> glm.vec2:
+        return self.sprite.get_frame_offset(self.current_frame)
+
+    def reset_speed(self):
+        self.frame_duration = DEFAULT_FRAME_DURATION
+
+    def restart(self):
+        self.current_frame = 0
+        self.countdown_timer = self.frame_duration
+
+    def reset_timer(self):
+        self.countdown_timer = self.frame_duration
+
+    def randomize_timer(self):
+        # add up to 1 less than frame_duration to the timer,
+        self.countdown_timer += random.randint(0, self.frame_duration - 1)
+
+    def set_frame_duration(self, frame_duration: int):
+        self.frame_duration = max(frame_duration, 1)
+
+    def step(self):
+        if not self.sprite.is_animated():
+            return
+
+        self.countdown_timer -= 1
+        if self.countdown_timer == 0:
+            self.countdown_timer = self.frame_duration
+            self.current_frame += 1
+            if self.current_frame >= self.sprite.get_num_frames():
+                self.current_frame = 0

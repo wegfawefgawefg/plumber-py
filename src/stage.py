@@ -1,12 +1,14 @@
 import copy
+from enum import Enum, auto
 from pprint import pprint
 import random
 
 import glm
 from entity import DisplayState, Entity, EntityType
+from entity_templates import player_template
 from sprites.sprite_animator import SpriteAnimator
 from sprites.sprite_definitions import PLAYER_STANDING, SpriteFamily
-from tiles import TILE_SIZE, Tiles
+from tiles import TILE_SIZE, Tile
 
 
 class TileCoordPair:
@@ -15,17 +17,61 @@ class TileCoordPair:
         self.coord = coord
 
 
+class Exit:
+    def __init__(self, goes_to, level_win=False):
+        self.goes_to = goes_to
+        self.level_win = level_win
+
+
+class Decoration:
+    def __init__(self, pos, sprite_animator):
+        self.pos = pos
+        self.sprite_animator = sprite_animator
+
+    def step(self):
+        self.sprite_animator.step()
+
+
 class Stage:
     def __init__(self):
-        self.wc_dims = None
-        self.dims = None
         self.entities = []
+        self.exits = {}
         self.tiles = None
 
+        self.foreground_decorations = []
+        self.background_decorations = []
+
+    @property
+    def dims(self):
+        return glm.vec2(len(self.tiles[0]), len(self.tiles))
+
+    @property
+    def wc_dims(self):
+        return self.dims * TILE_SIZE
+
+    def add_foreground_decoration(self, decoration):
+        self.foreground_decorations.append(decoration)
+
+    def add_background_decoration(self, decoration):
+        self.background_decorations.append(decoration)
+
     def set_tiles(self, tiles):
-        self.dims = glm.vec2(len(tiles[0]), len(tiles))
-        self.wc_dims = self.dims * TILE_SIZE
         self.tiles = tiles
+
+    def add_exit(self, pos, goes_to, level_win=False):
+        # make sure pos in range
+        if (
+            pos.x < 0
+            or pos.x >= len(self.tiles[0])
+            or pos.y < 0
+            or pos.y >= len(self.tiles)
+        ):
+            raise Exception("win tile pos out of the stage!!!")
+        self.tiles[pos.y][pos.x] = Tile.EXIT
+        self.exits[pos.to_tuple()] = Exit(goes_to, level_win)
+
+    def get_exit(self, pos):
+        return self.exits.get(pos.as_tuple())
 
     def set_entities(self, entities):
         self.entities = entities
@@ -95,64 +141,3 @@ class Stage:
                 coord = glm.uvec2(x, y)
                 tile_coord_pairs.append(TileCoordPair(tile, coord))
         return tile_coord_pairs
-
-
-STAGE_ONE = Stage()
-
-
-def fill_with_air(width, height):
-    return [[Tiles.AIR for _ in range(width)] for _ in range(height)]
-
-
-def floor(tiles, height):
-    assert height < 16
-    h_i = 16 - height
-    for h in range(h_i, 16):
-        for c, col in enumerate(tiles[h]):
-            tiles[h][c] = Tiles.BRICK
-    return tiles
-
-
-def put_a_win_tile(tiles):
-    x = len(tiles[0]) - 2
-    y = len(tiles) - 3
-    tiles[y][x] = Tiles.WIN
-    return tiles
-
-
-def random_bumps(tiles, height, chance):
-    # all the way across, a chance to put a block
-    for c in range(len(tiles[0])):
-        if random.random() < chance:
-            tiles[height][c] = Tiles.BRICK
-    return tiles
-
-
-t = fill_with_air(64, 16)
-t = floor(t, 2)
-t = put_a_win_tile(t)
-t = random_bumps(t, 13, 0.1)
-t = random_bumps(t, 10, 0.1)
-STAGE_ONE.set_tiles(t)
-
-player = Entity()
-player.type = EntityType.PLAYER
-player.pos = glm.vec2(4 * TILE_SIZE, 2 * TILE_SIZE)
-player.size = glm.vec2(8, 12)
-player.vel = glm.vec2(0, 0)
-player.acc = glm.vec2(0, 0)
-player.input_controlled = (True,)
-player.display_state = DisplayState.IDLE
-player.sprite_animator = SpriteAnimator(
-    SpriteFamily.PLAYER,
-    PLAYER_STANDING,
-)
-player.sprite_animator.frame_duration = 12
-
-STAGE_ONE.set_entities([player])
-# player_2 = copy.deepcopy(player)
-# player_2.pos.x += TILE_SIZE * 10
-# STAGE_ONE.entities.append(player_2)
-
-if __name__ == "__main__":
-    pprint(STAGE_ONE.tiles)
