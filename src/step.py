@@ -25,7 +25,7 @@ from systems.progression import exit_if_player_hits_exit_tile
 
 def step_playing(state, graphics):
     # control_camera(state, graphics)
-    step_sprite_animators(state)
+    step_sprite_animators(state, graphics)
     set_facing(state)
     update_display_states(state)
     zero_accelerations(state)

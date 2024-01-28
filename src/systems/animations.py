@@ -1,18 +1,33 @@
-from entity import DisplayState, Facing
+from entity import DisplayState, Facing, get_entity_bounds
 from sprites.sprite_animator import DEFAULT_FRAME_DURATION
+from tiles import TILE_SIZE
 
 
-def step_sprite_animators(state):
+def step_sprite_animators(state, graphics):
+    cam_l = graphics.camera.pos.x
+    cam_r = graphics.camera.pos.x + graphics.camera.size.x
     for e in state.entities:
         if e.sprite_animator is not None:
+            if e.pos.x > cam_r:
+                continue
+            if (e.pos.x + TILE_SIZE * 2) < cam_l:
+                continue
             e.sprite_animator.step()
 
     for d in state.stage.background_decorations:
         if d.sprite_animator is not None:
+            if d.pos.x > cam_r:
+                continue
+            if (d.pos.x + TILE_SIZE * 2) < cam_l:
+                continue
             d.sprite_animator.step()
 
     for d in state.stage.foreground_decorations:
         if d.sprite_animator is not None:
+            if d.pos.x > cam_r:
+                continue
+            if (d.pos.x + TILE_SIZE * 2) < cam_l:
+                continue
             d.sprite_animator.step()
 
 

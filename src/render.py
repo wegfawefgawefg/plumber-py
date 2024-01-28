@@ -80,14 +80,14 @@ def render_tiles(state, graphics):
 
 
 def render_background_decorations(state, graphics):
-    render_decorations(state, graphics, state.stage.background_decorations)
+    render_decorations(state, graphics, state.stage.background_decorations, tint=True)
 
 
 def render_foreground_decorations(state, graphics):
     render_decorations(state, graphics, state.stage.foreground_decorations)
 
 
-def render_decorations(state, graphics, decorations):
+def render_decorations(state, graphics, decorations, tint=False):
     cam = graphics.camera
     tl = cam.pos
     br = tl + cam.size
@@ -108,12 +108,26 @@ def render_decorations(state, graphics, decorations):
         if decoration_br.y < tl.y or decoration_tl.y > br.y:
             continue
 
+        decoration_surface = pygame.Surface(sample_size.to_tuple(), pygame.SRCALPHA)
+        decoration_surface.blit(
+            decorations_texture,
+            (0, 0, sample_size.x, sample_size.y),
+            (sample_pos.x, sample_pos.y, sample_size.x, sample_size.y),
+        )
+        if tint:
+            ckeep = 0
+            alpha = 200
+            decoration_surface.fill(
+                (ckeep, ckeep, ckeep, alpha), None, pygame.BLEND_RGBA_MULT
+            )
+        if decoration.flip:
+            decoration_surface = pygame.transform.flip(decoration_surface, True, False)
         render_pos = decoration.pos + render_offset - cam.pos
 
         graphics.render_surface.blit(
-            decorations_texture,
+            decoration_surface,
             (render_pos.x, render_pos.y, sample_size.x, sample_size.y),
-            (sample_pos.x, sample_pos.y, sample_size.x, sample_size.y),
+            (0, 0, sample_size.x, sample_size.y),
         )
 
 

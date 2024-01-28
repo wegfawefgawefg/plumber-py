@@ -4,7 +4,10 @@ from pprint import pprint
 import random
 
 import glm
-from tiles import Tile
+from sprites.sprite_animator import BasicSpriteAnimator
+from sprites.sprite_definitions import FLOWER, MINI_HILL
+from stage import Decoration
+from tiles import TILE_SIZE, Tile, is_tile_collidable
 
 
 class ForegroundOrBackground(Enum):
@@ -66,6 +69,49 @@ def random_bumps(tiles, height, tile, chance):
         if random.random() < chance:
             tiles[height][c] = tile
     return tiles
+
+
+def decorate_floor(stage):
+    flower_chance = 0.1
+    mini_hill_chance = 0.1
+    # check every tile in the stage, and if its a Tile. CAPPED_DIRT, add a flower or mini hill
+    for r, row in enumerate(stage.tiles):
+        for c, tile in enumerate(row):
+            if tile != Tile.CAPPED_DIRT:
+                continue
+
+            pos = glm.vec2(c, r - 1)
+            tile_at_pos = stage.tiles[int(pos.y)][int(pos.x)]
+            if tile_at_pos == Tile.EXIT:
+                continue
+
+            layer = foreground_or_background()
+            if layer == ForegroundOrBackground.BACKGROUND:
+                if is_tile_collidable(tile_at_pos):
+                    continue
+
+            item = None
+            if random.random() < flower_chance:
+                item = Decoration(
+                    glm.vec2(pos.x * TILE_SIZE, pos.y * TILE_SIZE),
+                    BasicSpriteAnimator(FLOWER),
+                    flip=random.random() < 0.5,
+                )
+
+            elif random.random() < mini_hill_chance:
+                item = Decoration(
+                    glm.vec2(pos.x * TILE_SIZE, pos.y * TILE_SIZE),
+                    BasicSpriteAnimator(MINI_HILL),
+                    flip=random.random() < 0.5,
+                )
+
+            if item is not None:
+                item.sprite_animator.frame_duration *= 4
+                match layer:
+                    case ForegroundOrBackground.FOREGROUND:
+                        stage.foreground_decorations.append(item)
+                    case ForegroundOrBackground.BACKGROUND:
+                        stage.background_decorations.append(item)
 
 
 _tiles_ = """

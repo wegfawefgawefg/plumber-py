@@ -8,13 +8,14 @@ from stage import Decoration, Exit, Stage
 from stages.level_building import (
     ForegroundOrBackground,
     air,
+    decorate_floor,
     floor,
     foreground_or_background,
     parse_map_tiles_string,
     where_are_the_exits,
 )
 from stages.stages import Stages
-from tiles import TILE_SIZE, Tile
+from tiles import TILE_SIZE, Tile, is_tile_collidable
 
 
 def a_a():
@@ -36,44 +37,13 @@ def a_a():
     ####    EXITS   ####
     # stage.add_exit(glm.ivec2(15, 7), Stages.A_A, level_win=True)
     for exit in A_A_EXITS:
+        # for exit in TEST_TILES_EXITS:
         pos, next_level, level_win = exit
         stage.add_exit(pos, next_level, level_win)
 
     ####    DECORATIONS     ####
     # lets add some flowers and mini hills at the floor level
-
-    flower_chance = 0.3
-    mini_hill_chance = 0.1
-    # check every tile in the stage, and if its a Tile. CAPPED_DIRT, add a flower or mini hill
-    for r, row in enumerate(stage.tiles):
-        for c, col in enumerate(row):
-            if col != Tile.CAPPED_DIRT:
-                continue
-
-            pos = glm.vec2(c, r - 1)
-
-            layer = foreground_or_background()
-
-            item = None
-            if random.random() < flower_chance:
-                item = Decoration(
-                    glm.vec2(pos.x * TILE_SIZE, pos.y * TILE_SIZE),
-                    BasicSpriteAnimator(FLOWER),
-                )
-
-            elif random.random() < mini_hill_chance:
-                item = Decoration(
-                    glm.vec2(pos.x * TILE_SIZE, pos.y * TILE_SIZE),
-                    BasicSpriteAnimator(MINI_HILL),
-                )
-
-            if item is not None:
-                item.sprite_animator.frame_duration *= 4
-                match layer:
-                    case ForegroundOrBackground.FOREGROUND:
-                        stage.foreground_decorations.append(item)
-                    case ForegroundOrBackground.BACKGROUND:
-                        stage.background_decorations.append(item)
+    decorate_floor(stage)
 
     return stage
 

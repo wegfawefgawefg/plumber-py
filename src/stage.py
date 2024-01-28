@@ -24,9 +24,10 @@ class Exit:
 
 
 class Decoration:
-    def __init__(self, pos, sprite_animator):
+    def __init__(self, pos, sprite_animator, flip=False):
         self.pos = pos
         self.sprite_animator = sprite_animator
+        self.flip = flip
 
     def step(self):
         self.sprite_animator.step()
