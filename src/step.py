@@ -1,5 +1,7 @@
 import pygame
+from audio import handle_audio_events
 from entity import EntityType
+from events import handle_events
 from render import mouse_pos
 
 from state import Mode
@@ -18,6 +20,7 @@ from systems.physics import (
     set_grounded,
     zero_accelerations,
 )
+from systems.progression import exit_if_player_hits_exit_tile
 
 
 def step_playing(state, graphics):
@@ -33,10 +36,9 @@ def step_playing(state, graphics):
     control_entities(state)
     speed_limit_controlled_entities(state)
     physics_post_step(state)
+    exit_if_player_hits_exit_tile(state)
 
     center_cam_on_player(state, graphics)
-
-    state.events.clear()
 
     some_debug_messages(state, graphics)
 
@@ -75,9 +77,15 @@ def step_pause(state, graphics):
     pass
 
 
-def step(state, graphics):
+def step(state, graphics, audio):
+    state.step_alerts()
+    state.debug_messages = []
+
     match state.mode:
         case Mode.PLAYING:
             step_playing(state, graphics)
         case Mode.PAUSE:
             step_pause(state, graphics)
+
+    handle_events(state, graphics, audio)
+    handle_audio_events(audio)

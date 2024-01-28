@@ -30,22 +30,25 @@ def physics_post_step(state):
         elif e.vel.y < -MAX_SPEED:
             e.vel.y = -MAX_SPEED
 
-        # collisions
-        #   # horizontal
-        new_pos = do_collisions_vertical(state, e, e.pos, e.size, e.vel)
-        if new_pos != None:
-            e.pos.y = new_pos
-            e.vel.y = 0.0
-        else:
-            e.pos.y += e.vel.y
+        if e.has_collisions:
+            # collisions
+            #   # horizontal
+            new_pos = do_collisions_vertical(state, e, e.pos, e.size, e.vel)
+            if new_pos != None:
+                e.pos.y = new_pos
+                e.vel.y = 0.0
+            else:
+                e.pos.y += e.vel.y
 
-        #   # horizontal
-        new_pos = do_collisions_horizontal(state, e, e.pos, e.size, e.vel)
-        if new_pos != None:
-            e.pos.x = new_pos
-            e.vel.x = 0.0
+            #   # horizontal
+            new_pos = do_collisions_horizontal(state, e, e.pos, e.size, e.vel)
+            if new_pos != None:
+                e.pos.x = new_pos
+                e.vel.x = 0.0
+            else:
+                e.pos.x += e.vel.x
         else:
-            e.pos.x += e.vel.x
+            e.pos += e.vel
 
 
 GRAVITY = 0.3

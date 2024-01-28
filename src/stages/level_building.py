@@ -1,7 +1,9 @@
 from enum import Enum, auto
+import inspect
+from pprint import pprint
 import random
-from stage import Exit
-from stages.stages import Stages
+
+import glm
 from tiles import Tile
 
 
@@ -66,15 +68,6 @@ def random_bumps(tiles, height, tile, chance):
     return tiles
 
 
-_tile_key_ = {
-    "a": Tile.AIR,
-    "b": Tile.DIRT,
-    "c": Tile.CAPPED_DIRT,
-    "p": Tile.PIPE,
-    "t": Tile.PIPE_TOP,
-    "s": Tile.BLOCK,
-    "q": Tile.COIN_BLOCK,
-}
 _tiles_ = """
 # intro area
 bcaaaaaaaa
@@ -88,17 +81,69 @@ bcasaaaaaa
 bcaaaaaaaa
 """
 
+CHAR_TO_TILE_KEY = {
+    "a": Tile.AIR,
+    "b": Tile.DIRT,
+    "c": Tile.CAPPED_DIRT,
+    "p": Tile.PIPE,
+    "t": Tile.PIPE_TOP,
+    "s": Tile.BLOCK,
+    "q": Tile.COIN_BLOCK,
+    "e": Tile.EXIT,
+}
 
-def parse_map_tiles_string(map_tiles_string):
+
+def parse_map_tiles_string(map_tiles_string, definition_line_number):
     # we need to 2d array of tiles
     # probably have build it column by column then transpose it
 
-    columns = []
-    for line in map_tiles_string.split("\n"):
-        col = []
+    valid_chars = set(CHAR_TO_TILE_KEY.keys())
+
+    rows = []
+    for li, line in enumerate(map_tiles_string.split("\n")):
+        row = []
         if line == "":
             continue
         if line[0] == "#":
             continue
+        line = line.strip()
         for c in line:
-            col.append(_tile_key_[c])
+            if c not in valid_chars:
+                raise Exception(
+                    f"unknown tile key {c} on {definition_line_number + li}"
+                )
+            else:
+                tile = CHAR_TO_TILE_KEY[c]
+                row.append(tile)
+        rows.append(row)
+
+    # make sure that it has rows
+    if len(rows) == 0:
+        raise Exception("no rows in map_tiles_string")
+    # make sure it has columns
+    if len(rows[0]) == 0:
+        raise Exception("no columns in map_tiles_string")
+
+    # transpose, but flip y
+    tiles = []
+    for c in range(len(rows[0])):
+        col = []
+        for r in range(len(rows)):
+            col.append(rows[r][10 - c - 1])
+        tiles.append(col)
+
+    return tiles
+
+
+def where_are_the_exits(tiles):
+    exits = []
+    for y, row in enumerate(tiles):
+        for x, col in enumerate(row):
+            if col == Tile.EXIT:
+                exits.append(glm.ivec2(x, y))
+    print(exits)
+
+
+if __name__ == "__main__":
+    tiles = parse_map_tiles_string(_tiles_)
+    pprint(tiles)

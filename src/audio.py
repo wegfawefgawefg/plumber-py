@@ -20,6 +20,8 @@ class Audio:
         self.sounds = AssetCache()
         self.music = AssetCache()
 
+        self.events = []
+
 
 @loader(load_sound, path="assets/sounds/")
 class Sounds(Enum):
@@ -28,7 +30,32 @@ class Sounds(Enum):
 
 @loader(load_song, path="assets/music/")
 class Music(Enum):
-    SHITTING = "shitting.ogg"
+    PLAY = "play.ogg"
+    WIN = "win.ogg"
+    DIE = "die.ogg"
+
+
+################################ AUDIO EVENTS ################################
+class AudioEvent:
+    pass
+
+
+class PlaySong(AudioEvent):
+    def __init__(self, song) -> None:
+        super().__init__()
+        self.song = song
+
+
+########################### AUDIO EVENT HANDLER ##############################
+def handle_audio_events(audio):
+    for event in audio.events:
+        match type(event):
+            case PlaySong:
+                song_path = audio.music.get(event.song)
+                pygame.mixer.music.load(song_path)
+                pygame.mixer.music.play()
+                pygame.mixer.music.set_volume(1.0)
+    audio.events.clear()
 
 
 if __name__ == "__main__":

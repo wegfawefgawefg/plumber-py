@@ -11,9 +11,22 @@ class Tile(Enum):
     DIRT = auto()
     EXIT = auto()
     SPIKES = auto()
+    PIPE = auto()
+    PIPE_TOP = auto()
+    BLOCK = auto()
+    COIN_BLOCK = auto()
 
 
-COLLIDEABLE_TILES = set((Tile.CAPPED_DIRT, Tile.DIRT))
+COLLIDEABLE_TILES = set(
+    (
+        Tile.CAPPED_DIRT,
+        Tile.DIRT,
+        Tile.PIPE,
+        Tile.PIPE_TOP,
+        Tile.BLOCK,
+        Tile.COIN_BLOCK,
+    )
+)
 
 
 def is_tile_collidable(tile):
@@ -37,6 +50,10 @@ TILE_TEXTURE_SAMPLE_POSITIONS = {
     Tile.DIRT: glm.uvec2(1, 1),
     Tile.EXIT: glm.uvec2(0, 9),
     Tile.SPIKES: glm.uvec2(0, 6),
+    Tile.PIPE: glm.uvec2(3, 1),
+    Tile.PIPE_TOP: glm.uvec2(2, 1),
+    Tile.BLOCK: glm.uvec2(4, 1),
+    Tile.COIN_BLOCK: glm.uvec2(5, 1),
 }
 
 

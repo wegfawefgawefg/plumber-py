@@ -4,7 +4,7 @@ from entity import Facing
 from graphics import Textures
 
 from state import Mode
-from tiles import TILE_SIZE, get_tile_texture_sample_position
+from tiles import TILE_SIZE, get_tile_texture_sample_position, is_tile_transparent
 
 
 def render_playing(state, graphics):
@@ -13,6 +13,7 @@ def render_playing(state, graphics):
     # render_crosshair(state, graphics)
     render_entites(state, graphics)
     render_foreground_decorations(state, graphics)
+    render_alerts(state, graphics)
     render_ui(state, graphics)
 
 
@@ -64,6 +65,13 @@ def render_tiles(state, graphics):
             sample_pos = get_tile_texture_sample_position(tile) * TILE_SIZE
 
             render_pos = glm.vec2(x, y) * TILE_SIZE - cam.pos
+            # if tile is transparent, render an air beneath it
+            if is_tile_transparent(tile):
+                graphics.render_surface.blit(
+                    tiles_texture,
+                    (render_pos.x, render_pos.y, TILE_SIZE, TILE_SIZE),
+                    (0, 0, TILE_SIZE, TILE_SIZE),
+                )
             graphics.render_surface.blit(
                 tiles_texture,
                 (render_pos.x, render_pos.y, TILE_SIZE, TILE_SIZE),
@@ -196,7 +204,8 @@ def render_ui(state, graphics):
 
 
 def meta_render(state, graphics):
-    render_debug_messages(state, graphics)
+    # render_debug_messages(state, graphics)
+    pass
 
 
 def render_debug_messages(state, graphics):
@@ -210,5 +219,26 @@ def render_debug_messages(state, graphics):
 
         font_surface = font.render(text, True, color)
         graphics.window.blit(font_surface, cursor.to_tuple())
+
+        cursor.y += font.get_height()
+
+
+def render_alerts(state, graphics):
+    # sort by the lifetime
+    state.alerts.sort(
+        key=lambda alert: alert.lifetime,
+        reverse=True,
+    )
+
+    # half width
+    half_width = graphics.render_resolution.x / 2
+    cursor = glm.vec2(half_width, 0)
+    for alert in state.alerts:
+        text = alert.text
+        color = (255, 255, 255)
+        font = pygame.font.SysFont("Arial", 12)
+
+        font_surface = font.render(text, True, color)
+        graphics.render_surface.blit(font_surface, cursor.to_tuple())
 
         cursor.y += font.get_height()

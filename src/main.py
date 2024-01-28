@@ -1,13 +1,14 @@
 import math
+from pprint import pprint
 import pygame
 import glm
-from process_inputs import process_inputs
 
-from render import meta_render, render, render_debug_messages
+from process_inputs import process_inputs
+from render import meta_render, render
 from graphics import Graphics
 from stages.a_a import a_a
 from state import State
-from audio import Audio
+from audio import Audio, Music, PlaySong
 from step import step
 
 pygame.init()
@@ -19,6 +20,7 @@ def main():
     audio = Audio()
 
     state.load_stage(a_a())
+    audio.events.append(PlaySong(Music.PLAY))
 
     clock = pygame.time.Clock()
     running = True
@@ -32,8 +34,7 @@ def main():
                 running = False
 
         process_inputs(state)
-        state.meta_step()
-        step(state, graphics)
+        step(state, graphics, audio)
 
         graphics.render_surface.fill((0, 0, 0))
         render(state, graphics)

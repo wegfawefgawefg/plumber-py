@@ -34,6 +34,7 @@ class Decoration:
 
 class Stage:
     def __init__(self):
+        self.won = False
         self.entities = []
         self.exits = {}
         self.tiles = None
@@ -59,13 +60,9 @@ class Stage:
         self.tiles = tiles
 
     def add_exit(self, pos, goes_to, level_win=False):
+        print(self.dims)
         # make sure pos in range
-        if (
-            pos.x < 0
-            or pos.x >= len(self.tiles[0])
-            or pos.y < 0
-            or pos.y >= len(self.tiles)
-        ):
+        if pos.x < 0 or pos.x >= self.dims.x or pos.y < 0 or pos.y >= self.dims.y:
             raise Exception("win tile pos out of the stage!!!")
         self.tiles[pos.y][pos.x] = Tile.EXIT
         self.exits[pos.to_tuple()] = Exit(goes_to, level_win)

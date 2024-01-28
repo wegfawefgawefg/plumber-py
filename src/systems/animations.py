@@ -37,14 +37,17 @@ def update_display_states(state):
         new_animation_duration = None
         if entity.hp == 0:
             new_display_state = DisplayState.DEAD
+            new_animation_duration = DEFAULT_FRAME_DURATION
         elif entity.stun_timer > 0:
             new_display_state = DisplayState.STUNNED
         elif abs(entity.vel.x) > RUNNING_THRESHOLD:
             new_animation_duration = DEFAULT_FRAME_DURATION / 2
         elif abs(entity.vel.x) > WALKING_THRESHOLD:
             new_display_state = DisplayState.WALKING
+            new_animation_duration = DEFAULT_FRAME_DURATION
         else:
             new_display_state = DisplayState.NEUTRAL
+            new_animation_duration = DEFAULT_FRAME_DURATION * 2
 
         if new_display_state != None and new_display_state != entity.display_state:
             entity.display_state = new_display_state

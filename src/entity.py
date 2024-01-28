@@ -36,9 +36,11 @@ class Entity:
         self.sprite_animator = None
         self.no_gravity = False
         self.facing = Facing.RIGHT
+        self.has_collisions = True
 
         self.stun_timer = 0
         self.hp = 1
+        self.invincible = False
 
         # optional components
         self.coyote_timer = None

@@ -16,8 +16,8 @@ class Message:
 
 def step_and_cleanse(collection):
     for item in collection:
-        item.duration -= 1
-    return [item for item in collection if item.duration > 0]
+        item.lifetime -= 1
+    return [item for item in collection if item.lifetime > 0]
 
 
 class State:
@@ -28,9 +28,12 @@ class State:
         self.stage: Stage = None
 
         self.events = []
+        self.special_effects = []
 
         self.debug_messages: list[str] = []
         self.alerts: list[Message] = []
+
+        self.center_cam_on_player = True
 
     def load_stage(self, stage):
         self.stage = stage
@@ -38,7 +41,3 @@ class State:
 
     def step_alerts(self):
         self.alerts = step_and_cleanse(self.alerts)
-
-    def meta_step(self):
-        self.step_alerts()
-        self.debug_messages = []
