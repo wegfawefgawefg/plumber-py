@@ -62,8 +62,13 @@ class SpriteAnimator:
         if not self.sprite.is_animated():
             return
 
-        self.countdown_timer -= 1
+        if self.countdown_timer > 0:
+            self.countdown_timer -= 1
         if self.countdown_timer == 0:
+            if not self.sprite.is_looping():
+                num_frames = self.sprite.get_num_frames()
+                if (self.sprite.get_num_frames() - 1) == self.current_frame:
+                    return
             self.countdown_timer = self.frame_duration
             self.current_frame += 1
             if self.current_frame >= self.sprite.get_num_frames():

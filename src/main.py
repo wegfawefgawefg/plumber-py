@@ -15,6 +15,10 @@ pygame.init()
 
 
 def main():
+    if pygame.joystick.get_count() > 0:
+        joystick = pygame.joystick.Joystick(0)
+        joystick.init()
+
     state = State()
     graphics = Graphics()
     audio = Audio()

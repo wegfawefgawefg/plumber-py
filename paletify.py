@@ -65,7 +65,14 @@ palette_string = """
 # 333c57
 """
 
-# Path to your PNG image
-image_path = "/home/vega/Coding/GameDev/plumber-py/land.png"
+
+# get path from input arg
+import sys
+
+if len(sys.argv) > 1:
+    image_path = sys.argv[1]
+else:
+    print("No image path given, using default")
+
 
 palletify_image(image_path, palette_string)

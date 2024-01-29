@@ -35,7 +35,16 @@ def is_tile_collidable(tile):
     return False
 
 
-TRANSPARENT_TILES = set((Tile.EXIT, Tile.SPIKES))
+TRANSPARENT_TILES = set(
+    (
+        Tile.EXIT,
+        Tile.SPIKES,
+        Tile.PIPE,
+        Tile.PIPE_TOP,
+        Tile.BLOCK,
+        Tile.COIN_BLOCK,
+    )
+)
 
 
 def is_tile_transparent(tile):

@@ -10,7 +10,7 @@ def exit_if_player_hits_exit_tile(state: State):
     if state.stage.won == True:
         return
 
-    for e in state.entities:
+    for e in state.active_entities:
         if e.type == EntityType.PLAYER:
             player_tile_pos = e.pos // TILE_SIZE
             player_tile_pos_tuple = (player_tile_pos.x, player_tile_pos.y)

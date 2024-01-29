@@ -1,7 +1,7 @@
 import inspect
 import random
 import glm
-from entity_templates import player_template
+from entity_templates import goomba_template, player_template
 from sprites.sprite_animator import BasicSpriteAnimator
 from sprites.sprite_definitions import FLOWER, MINI_HILL
 from stage import Decoration, Exit, Stage
@@ -33,6 +33,15 @@ def a_a():
     ####    ENTITIES    ####
     player = player_template()
     stage.entities.append(player)
+
+    # spawn some goombas
+    for i in range(0, 10):
+        # random tile position in map
+        x = random.randint(0, (stage.dims.x // 10) - 1)
+        y = 0
+
+        goomba = goomba_template(glm.ivec2(x, y))
+        stage.entities.append(goomba)
 
     ####    EXITS   ####
     # stage.add_exit(glm.ivec2(15, 7), Stages.A_A, level_win=True)

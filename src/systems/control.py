@@ -20,7 +20,7 @@ def control_camera(state, graphics):
 def center_cam_on_player(state, graphics):
     if not state.center_cam_on_player:
         return
-    player_entities = [e for e in state.entities if e.type == EntityType.PLAYER]
+    player_entities = [e for e in state.active_entities if e.type == EntityType.PLAYER]
     if len(player_entities) == 0:
         return
     xs = [e.pos.x + e.size.x / 2 for e in player_entities]
@@ -50,7 +50,7 @@ RUNNING_JUMP_FORCE = -4.8
 
 
 def control_entities(state):
-    controllable_entities = [e for e in state.entities if e.input_controlled]
+    controllable_entities = [e for e in state.active_entities if e.input_controlled]
     for e in controllable_entities:
         if state.inputs.left:
             if state.inputs.run:
@@ -84,7 +84,7 @@ RUNNER_MAX_SPEED = 3.0
 
 
 def speed_limit_controlled_entities(state):
-    controllable_entities = [e for e in state.entities if e.input_controlled]
+    controllable_entities = [e for e in state.active_entities if e.input_controlled]
 
     for e in controllable_entities:
         if e.input_controlled:
@@ -111,7 +111,7 @@ def speed_limit_controlled_entities(state):
 
 
 def step_coyote_timers(state):
-    for e in state.entities:
+    for e in state.active_entities:
         if e.coyote_timer is None:
             continue
 

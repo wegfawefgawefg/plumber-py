@@ -73,11 +73,30 @@ PLAYER_FALLING = SeriallyStoredAnimatedSprite(
     True,
 )
 
+GOOMBA_WALKING = SeriallyStoredAnimatedSprite(
+    Textures.ENTITIES,
+    glm.vec2(64, 16),
+    glm.vec2(16, 16),
+    glm.vec2(-1, -1),
+    4,
+    True,
+)
+
+GOOMBA_DEAD = SeriallyStoredAnimatedSprite(
+    Textures.ENTITIES,
+    glm.vec2(64, 32),
+    glm.vec2(16, 16),
+    glm.vec2(-1, -1),
+    11,
+    False,
+)
+
 
 # ////////////////////////    ENTITY SPRITE FAMILIES    ////////////////////////
 class SpriteFamily(Enum):
     PLAYER = auto()
     BAT = auto()
+    GOOMBA = auto()
 
 
 def get_sprite_for_display_state_given_family(
@@ -98,6 +117,14 @@ def get_sprite_for_display_state_given_family(
                     return PLAYER_STUNNED
                 case DisplayState.DEAD:
                     return PLAYER_DEAD
+        case SpriteFamily.GOOMBA:
+            match display_state:
+                case DisplayState.WALKING:
+                    return GOOMBA_WALKING
+                case DisplayState.DEAD:
+                    return GOOMBA_DEAD
+                case _:
+                    return GOOMBA_WALKING
 
 
 ###################################################################################

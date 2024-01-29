@@ -2,6 +2,7 @@ import glm
 from collisions import (
     do_collisions_horizontal,
     do_collisions_vertical,
+    do_entity_collisions_vertical,
 )
 from entity import get_entity_bounds
 
@@ -9,7 +10,7 @@ from tiles import TILE_SIZE, collidable_tile_in_list
 
 
 def zero_accelerations(state):
-    for e in state.entities:
+    for e in state.active_entities:
         e.acc = glm.vec2(0, 0)
 
 
@@ -17,7 +18,7 @@ MAX_SPEED = 9.0
 
 
 def physics_post_step(state):
-    for e in state.entities:
+    for e in state.active_entities:
         e.vel += e.acc
 
         # clamp
@@ -33,12 +34,24 @@ def physics_post_step(state):
         if e.has_collisions:
             # collisions
             #   # horizontal
-            new_pos = do_collisions_vertical(state, e, e.pos, e.size, e.vel)
-            if new_pos != None:
-                e.pos.y = new_pos
-                e.vel.y = 0.0
+            t_new_pos = do_collisions_vertical(state, e, e.pos, e.size, e.vel)
+            e_new_pos = do_entity_collisions_vertical(state, e, e.pos, e.size, e.vel)
+            if t_new_pos is None and e_new_pos is None:
+                e.pos += e.vel
             else:
-                e.pos.y += e.vel.y
+                if t_new_pos is None and e_new_pos is not None:
+                    e.pos.y = e_new_pos
+                    e.vel.y = 0.0
+                elif t_new_pos is not None and e_new_pos is None:
+                    e.pos.y = t_new_pos
+                    e.vel.y = 0.0
+                else:
+                    if e.vel.y > 0:
+                        e.pos.y = min(t_new_pos, e_new_pos)
+                        e.vel.y = 0.0
+                    else:  # MAYBE BUG: when not moving
+                        e.pos.y = max(t_new_pos, e_new_pos)
+                        e.vel.y = 0.0
 
             #   # horizontal
             new_pos = do_collisions_horizontal(state, e, e.pos, e.size, e.vel)
@@ -55,7 +68,7 @@ GRAVITY = 0.3
 
 
 def gravity(state):
-    for e in state.entities:
+    for e in state.active_entities:
         if e.no_gravity:
             continue
         e.acc.y += GRAVITY
@@ -63,11 +76,11 @@ def gravity(state):
 
 def set_grounded(state):
     # clear grounded
-    for e in state.entities:
+    for e in state.active_entities:
         e.grounded = False
 
     # find who is grounded
-    for e in state.entities:
+    for e in state.active_entities:
         entity_tl, entity_br = get_entity_bounds(e.pos, e.size)
 
         feet_tl = glm.vec2(entity_tl.x, entity_br.y)

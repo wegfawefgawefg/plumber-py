@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from entity import get_entity_bounds
 
 from stage import Stage
 
@@ -25,6 +26,7 @@ class State:
         self.mode = Mode.PLAYING
 
         self.entities = []
+        self.active_entities = []
         self.stage: Stage = None
 
         self.events = []
@@ -41,3 +43,24 @@ class State:
 
     def step_alerts(self):
         self.alerts = step_and_cleanse(self.alerts)
+
+    def set_active_entities(self, camera):
+        self.active_entities.clear()
+
+        ctl = camera.pos
+        cbr = camera.pos + camera.size
+
+        for entity in self.entities:
+            if entity.always_active:
+                self.active_entities.append(entity)
+                continue
+            entity_tl, entity_br = get_entity_bounds(entity.pos, entity.size)
+            if entity_br.x < ctl.x:
+                continue
+            if entity_br.y < ctl.y:
+                continue
+            if entity_tl.x > cbr.x:
+                continue
+            if entity_tl.y > cbr.y:
+                continue
+            self.active_entities.append(entity)

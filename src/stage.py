@@ -45,10 +45,12 @@ class Stage:
 
     @property
     def dims(self):
+        """Returns the dimensions of the stage in tile coordinates"""
         return glm.vec2(len(self.tiles[0]), len(self.tiles))
 
     @property
     def wc_dims(self):
+        """Returns the dimensions of the stage in world coordinates"""
         return self.dims * TILE_SIZE
 
     def add_foreground_decoration(self, decoration):

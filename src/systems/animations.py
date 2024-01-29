@@ -4,16 +4,12 @@ from tiles import TILE_SIZE
 
 
 def step_sprite_animators(state, graphics):
-    cam_l = graphics.camera.pos.x
-    cam_r = graphics.camera.pos.x + graphics.camera.size.x
-    for e in state.entities:
+    for e in state.active_entities:
         if e.sprite_animator is not None:
-            if e.pos.x > cam_r:
-                continue
-            if (e.pos.x + TILE_SIZE * 2) < cam_l:
-                continue
             e.sprite_animator.step()
 
+    cam_l = graphics.camera.pos.x
+    cam_r = graphics.camera.pos.x + graphics.camera.size.x
     for d in state.stage.background_decorations:
         if d.sprite_animator is not None:
             if d.pos.x > cam_r:
@@ -35,7 +31,7 @@ FACING_THRESHOLD = 0.2
 
 
 def set_facing(state):
-    for entity in state.entities:
+    for entity in state.active_entities:
         if entity.vel.x > FACING_THRESHOLD:
             entity.facing = Facing.RIGHT
         elif entity.vel.x < -FACING_THRESHOLD:
@@ -47,7 +43,7 @@ RUNNING_THRESHOLD = 2.5
 
 
 def update_display_states(state):
-    for entity in state.entities:
+    for entity in state.active_entities:
         new_display_state = None
         new_animation_duration = None
         if entity.hp == 0:

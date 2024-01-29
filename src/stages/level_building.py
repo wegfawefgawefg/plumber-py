@@ -72,7 +72,7 @@ def random_bumps(tiles, height, tile, chance):
 
 
 def decorate_floor(stage):
-    flower_chance = 0.1
+    flower_chance = 0.8
     mini_hill_chance = 0.1
     # check every tile in the stage, and if its a Tile. CAPPED_DIRT, add a flower or mini hill
     for r, row in enumerate(stage.tiles):

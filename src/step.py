@@ -6,6 +6,7 @@ from render import mouse_pos
 
 from state import Mode
 import systems
+from systems.ai import step_ai
 from systems.animations import set_facing, step_sprite_animators, update_display_states
 from systems.control import (
     center_cam_on_player,
@@ -24,18 +25,25 @@ from systems.progression import exit_if_player_hits_exit_tile
 
 
 def step_playing(state, graphics):
+    state.set_active_entities(graphics.camera)
+
+    #### PRE STEP
     # control_camera(state, graphics)
-    step_sprite_animators(state, graphics)
-    set_facing(state)
     update_display_states(state)
     zero_accelerations(state)
     gravity(state)
     set_grounded(state)
     step_coyote_timers(state)
 
+    ### STEP
     control_entities(state)
+    step_ai(state)
+
+    ### POST STEP
     speed_limit_controlled_entities(state)
     physics_post_step(state)
+    set_facing(state)
+    step_sprite_animators(state, graphics)
     exit_if_player_hits_exit_tile(state)
 
     center_cam_on_player(state, graphics)

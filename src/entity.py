@@ -37,6 +37,9 @@ class Entity:
         self.no_gravity = False
         self.facing = Facing.RIGHT
         self.has_collisions = True
+        self.has_entity_collisions = True
+        self.grounded = False
+        self.always_active = False
 
         self.stun_timer = 0
         self.hp = 1
@@ -44,6 +47,7 @@ class Entity:
 
         # optional components
         self.coyote_timer = None
+        self.ai = None
 
 
 ###################### UTILS ######################
@@ -69,3 +73,7 @@ def get_tiles_at_feet(pos, size, state):
     feet_br_tile_pos = feet_br / TILE_SIZE
     tiles_at_feet = state.stage.get_tiles_in_rect(feet_tl_tile_pos, feet_br_tile_pos)
     return tiles_at_feet
+
+
+def intersects(tl, br, otl, obr):
+    return not (br.x < otl.x or tl.x > obr.x or br.y < otl.y or tl.y > obr.y)
