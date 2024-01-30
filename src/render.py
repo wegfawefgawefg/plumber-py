@@ -218,7 +218,7 @@ def render_ui(state, graphics):
 
 
 def meta_render(state, graphics):
-    # render_debug_messages(state, graphics)
+    render_debug_messages(state, graphics)
     pass
 
 

@@ -36,7 +36,7 @@ class Entity:
         self.sprite_animator = None
         self.no_gravity = False
         self.facing = Facing.RIGHT
-        self.has_collisions = True
+        self.has_tile_collisions = True
         self.has_entity_collisions = True
         self.grounded = False
         self.always_active = False
@@ -48,6 +48,9 @@ class Entity:
         # optional components
         self.coyote_timer = None
         self.ai = None
+
+    def __repr__(self) -> str:
+        return f"Entity({self.type})"
 
 
 ###################### UTILS ######################

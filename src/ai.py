@@ -1,6 +1,8 @@
 from enum import Enum, auto
 import random
 
+from audio import PlaySound, Sounds
+
 
 class AI:
     pass
@@ -21,11 +23,27 @@ class WalkRandomlySometimes(AI):
         self.timer = 0
         self.direction = 0
 
-    def step(self, entity):
+    def step(self, entity, state, graphics, audio):
         if entity.hp <= 0:
             return
 
         if self.timer == 0:
+            # 1 in 5 chance to become dead
+            if random.randint(0, 5) == 0:
+                audio.events.append(
+                    PlaySound(
+                        random.choice(
+                            (
+                                Sounds.GOOMBA_CRY,
+                                Sounds.GOOMBA_CRY_HIGH,
+                                Sounds.GOOMBA_CRY_LOW,
+                            )
+                        )
+                    )
+                )
+                entity.hp = 0
+                return
+
             new_mode = random.choice((StayStillOrWalk.WALK, StayStillOrWalk.STAY_STILL))
             self.mode = new_mode
             match self.mode:

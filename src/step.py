@@ -15,6 +15,7 @@ from systems.control import (
     speed_limit_controlled_entities,
     step_coyote_timers,
 )
+from systems.debug import debug_collisions
 from systems.physics import (
     gravity,
     physics_post_step,
@@ -24,7 +25,7 @@ from systems.physics import (
 from systems.progression import exit_if_player_hits_exit_tile
 
 
-def step_playing(state, graphics):
+def step_playing(state, graphics, audio):
     state.set_active_entities(graphics.camera)
 
     #### PRE STEP
@@ -37,18 +38,20 @@ def step_playing(state, graphics):
 
     ### STEP
     control_entities(state)
-    step_ai(state)
+    step_ai(state, graphics, audio)
 
     ### POST STEP
     speed_limit_controlled_entities(state)
     physics_post_step(state)
+
     set_facing(state)
     step_sprite_animators(state, graphics)
     exit_if_player_hits_exit_tile(state)
 
     center_cam_on_player(state, graphics)
 
-    some_debug_messages(state, graphics)
+    # some_debug_messages(state, graphics)
+    # debug_collisions(state)
 
 
 def some_debug_messages(state, graphics):
@@ -87,11 +90,12 @@ def step_pause(state, graphics):
 
 def step(state, graphics, audio):
     state.step_alerts()
-    state.debug_messages = []
+    state.debug_messages.clear()
+    state.events.clear()
 
     match state.mode:
         case Mode.PLAYING:
-            step_playing(state, graphics)
+            step_playing(state, graphics, audio)
         case Mode.PAUSE:
             step_pause(state, graphics)
 

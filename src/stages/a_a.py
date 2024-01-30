@@ -22,8 +22,8 @@ def a_a():
     stage = Stage()
 
     ####    TILES   ####
-    t = parse_map_tiles_string(A_A_TILES, A_A_TILES_LINE_NUMBER)
-    # t = parse_map_tiles_string(TEST_TILES, TEST_TILES_LINE_NUMBER)
+    # t = parse_map_tiles_string(A_A_TILES, A_A_TILES_LINE_NUMBER)
+    t = parse_map_tiles_string(TEST_TILES, TEST_TILES_LINE_NUMBER)
     # t = air(stage_width)
     # t = floor(t, floor_level, Tile.CAPPED_DIRT, Tile.DIRT)
     # t = random_bumps(t, 13, 0.1)
@@ -31,28 +31,41 @@ def a_a():
     stage.set_tiles(t)
 
     ####    ENTITIES    ####
+    # player = player_template()
+    # stage.entities.append(player)
+
+    # spawn some goombas
+    # for i in range(0, 100):
+    #     # random tile position in map
+    #     # x = random.randint(0, (stage.dims.x // 10) - 1)
+    #     x = random.randint(0, (stage.dims.x) - 1)
+    #     y = 0
+
+    #     goomba = goomba_template(glm.ivec2(x, y))
+    #     stage.entities.append(goomba)
+
+    # spawn a goomba on every tile above the floor
+    for y in range(1, int(stage.dims.y) - 1):
+        for x in range(1, int(stage.dims.x) - 1):
+            tile = stage.get_tile(x, y)
+            if tile == Tile.AIR:
+                pos = glm.vec2(x, y)
+                goomba = goomba_template(pos)
+                stage.entities.append(goomba)
+
     player = player_template()
     stage.entities.append(player)
 
-    # spawn some goombas
-    for i in range(0, 10):
-        # random tile position in map
-        x = random.randint(0, (stage.dims.x // 10) - 1)
-        y = 0
-
-        goomba = goomba_template(glm.ivec2(x, y))
-        stage.entities.append(goomba)
-
     ####    EXITS   ####
     # stage.add_exit(glm.ivec2(15, 7), Stages.A_A, level_win=True)
-    for exit in A_A_EXITS:
-        # for exit in TEST_TILES_EXITS:
-        pos, next_level, level_win = exit
-        stage.add_exit(pos, next_level, level_win)
+    # for exit in A_A_EXITS:
+    #     # for exit in TEST_TILES_EXITS:
+    #     pos, next_level, level_win = exit
+    #     stage.add_exit(pos, next_level, level_win)
 
     ####    DECORATIONS     ####
     # lets add some flowers and mini hills at the floor level
-    decorate_floor(stage)
+    # decorate_floor(stage)
 
     return stage
 
@@ -75,7 +88,7 @@ bcaaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa
-bcaaaaaaaa
+bbcaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa

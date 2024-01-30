@@ -1,6 +1,6 @@
 import pygame
 from glm import ceil, floor, vec2, ivec2
-from entity import get_entity_bounds, intersects
+from entity import Entity, get_entity_bounds, intersects
 from events import Side
 from state import State
 
@@ -16,12 +16,15 @@ class TileCoordPair:
 
 class EntityTileCollision:
     def __init__(self, entity, tile, tile_coord, side, pos, vel):
-        self.entity = entity
+        self.entity: Entity = entity
         self.tile = tile
         self.tile_coord = tile_coord
-        self.side = side
+        self.side: Side = side
         self.pos = pos
         self.vel = vel
+
+    def __repr__(self) -> str:
+        return f"ETC({self.entity}, {self.tile}, {self.side}, ({self.pos.x:.2f}, {self.pos.y:.2f}), ({self.vel.x:.2f}, {self.vel.y:.2f}))"
 
 
 class EntityEntityCollision:
@@ -31,6 +34,9 @@ class EntityEntityCollision:
         self.side = side
         self.pos = pos
         self.vel = vel
+
+    def __repr__(self) -> str:
+        return f"EEC({self.entity_a}, {self.entity_b}, {self.side}, ({self.pos.x:.2f}, {self.pos.y:.2f}), ({self.vel.x:.2f}, {self.vel.y:.2f}))"
 
 
 def do_collisions_vertical(
@@ -231,7 +237,7 @@ def do_entity_collisions_vertical(
             return new_y_pos
 
         elif vel.y < 0.0:
-            bottom_most_y = max(oe.pos.y for oe in collided_entities)
+            bottom_most_y = max(oe.pos.y + oe.size.y for oe in collided_entities)
             new_y_pos = bottom_most_y
 
             # trigger events
@@ -244,5 +250,67 @@ def do_entity_collisions_vertical(
                 )
 
             return new_y_pos
+
+    return None
+
+
+def do_entity_collisions_horizontal(
+    state: State, entity, pos: ivec2, size: ivec2, vel: vec2
+) -> None | float:
+    """Returns the new x position if collided, None otherwise"""
+    stage = state.stage
+
+    x_vel = vel.x
+    if x_vel > 0:
+        x_vel = ceil(x_vel)
+    elif x_vel < 0:
+        x_vel = floor(x_vel)
+
+    one_dim_vel = vec2(x_vel, 0)
+    next_pos = pos + one_dim_vel
+    next_pos_tl = next_pos
+    next_pos_br = next_pos + size - vec2(1, 1)
+
+    # find intersected entities
+    intersected_entities = []
+    for oe in state.active_entities:
+        if oe == entity:
+            continue
+        oe_tl, oe_br = get_entity_bounds(oe.pos, oe.size)
+        if intersects(next_pos_tl, next_pos_br, oe_tl, oe_br):
+            intersected_entities.append(oe)
+
+    collided_entities = [oe for oe in intersected_entities if oe.has_entity_collisions]
+
+    if collided_entities:  # collided
+        if vel.x > 0.0:
+            left_most_x = min(oe.pos.x for oe in collided_entities)
+            new_x_pos = left_most_x - size.x
+
+            # trigger events
+            left_most_entities = [
+                oe for oe in collided_entities if oe.pos.x == left_most_x
+            ]
+            for oe in left_most_entities:
+                state.events.append(
+                    EntityEntityCollision(entity, oe, Side.RIGHT, pos, vel)
+                )
+
+            return new_x_pos
+
+        elif vel.x < 0.0:
+            right_most_x = max(oe.pos.x + oe.size.x for oe in collided_entities)
+            new_x_pos = right_most_x
+
+            # trigger events
+            right_most_entities = [
+                oe for oe in collided_entities if oe.pos.x == right_most_x
+            ]
+            for oe in right_most_entities:
+                state.events.append(
+                    EntityEntityCollision(entity, oe, Side.LEFT, pos, vel)
+                )
+
+            return new_x_pos
 
     return None

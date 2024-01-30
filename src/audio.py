@@ -26,6 +26,9 @@ class Audio:
 @loader(load_sound, path="assets/sounds/")
 class Sounds(Enum):
     JUMP = "jump.ogg"
+    GOOMBA_CRY_HIGH = "goomba_cry_high.ogg"
+    GOOMBA_CRY_LOW = "goomba_cry_low.ogg"
+    GOOMBA_CRY = "goomba_cry.ogg"
 
 
 @loader(load_song, path="assets/music/")
@@ -46,15 +49,27 @@ class PlaySong(AudioEvent):
         self.song = song
 
 
+class PlaySound(AudioEvent):
+    def __init__(self, sound) -> None:
+        super().__init__()
+        self.sound = sound
+
+
 ########################### AUDIO EVENT HANDLER ##############################
 def handle_audio_events(audio):
     for event in audio.events:
-        match type(event):
-            case PlaySong:
+        match event:
+            case PlaySong():
                 song_path = audio.music.get(event.song)
                 pygame.mixer.music.load(song_path)
                 pygame.mixer.music.play()
                 pygame.mixer.music.set_volume(1.0)
+            case PlaySound():
+                sound = audio.sounds.get(event.sound)
+                sound.play()
+            case _:
+                pass
+
     audio.events.clear()
 
 
