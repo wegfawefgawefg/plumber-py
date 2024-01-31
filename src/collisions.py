@@ -57,9 +57,10 @@ def do_collisions_vertical(
     next_pos_br = next_pos + size - vec2(1, 1)
 
     # Check if out of bounds in y direction
-    if next_pos_tl.y < 0:
-        return 0.0
-    elif next_pos_br.y > stage.get_height() - 1:
+    #   #  skip the ceiling, it was annoying
+    # if next_pos_tl.y < 0:
+    #     return 0.0
+    if next_pos_br.y > stage.get_height() - 1:
         return stage.get_height() - size.y
 
     # Check for collisions with tiles

@@ -50,7 +50,7 @@ def step_playing(state, graphics, audio):
 
     center_cam_on_player(state, graphics)
 
-    # some_debug_messages(state, graphics)
+    some_debug_messages(state, graphics)
     # debug_collisions(state)
 
 

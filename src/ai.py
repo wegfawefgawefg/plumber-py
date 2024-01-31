@@ -25,6 +25,8 @@ class WalkRandomlySometimes(AI):
 
     def step(self, entity, state, graphics, audio):
         if entity.hp <= 0:
+            entity.size.y = 11
+            entity.vel.x = 0
             return
 
         if self.timer == 0:

@@ -54,6 +54,7 @@ def a_a():
                 stage.entities.append(goomba)
 
     player = player_template()
+    player.pos.y -= 10 * TILE_SIZE
     stage.entities.append(player)
 
     ####    EXITS   ####

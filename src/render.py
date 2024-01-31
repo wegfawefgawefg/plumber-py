@@ -1,3 +1,4 @@
+from math import ceil
 import pygame
 import glm
 from entity import Facing
@@ -146,19 +147,6 @@ def render_entites(state, graphics):
         if entity_br.y < tl.y or entity_tl.y > br.y:
             continue
 
-        # render the entity box
-        # pygame.draw.rect(
-        #     graphics.render_surface,
-        #     (255, 0, 0),
-        #     (
-        #         entity.pos.x - cam.pos.x,
-        #         entity.pos.y - cam.pos.y,
-        #         entity.size.x,
-        #         entity.size.y,
-        #     ),
-        #     1,
-        # )
-
         sprite_animator = entity.sprite_animator
         frame_num = sprite_animator.get_current_frame()
         sample_position = sprite_animator.sprite.get_frame_pos(frame_num)
@@ -177,15 +165,48 @@ def render_entites(state, graphics):
             sample_surface = pygame.transform.flip(sample_surface, True, False)
             # invert render offset
 
-            render_pos = entity.pos + render_offset - cam.pos
-            render_offset = glm.vec2(render_offset.x, render_offset.y)
+            # a width of 5 would be a single tile wide
+            # a width of 17 would be 2 tiles wide
+            num_tiles_wide = ceil(sample_size.x / TILE_SIZE)
+            area_width = num_tiles_wide * TILE_SIZE
 
-        render_pos = entity.pos + render_offset - cam.pos
+            flipped_render_offset = glm.vec2(
+                -(area_width - render_offset.x - sample_size.x) + 1, render_offset.y
+            )
+            # print("flipped render offset: ", flipped_render_offset)
+            render_pos = entity.pos + flipped_render_offset - cam.pos
+        else:
+            render_pos = entity.pos + render_offset - cam.pos
 
         # blit the surface to the render surface
         graphics.render_surface.blit(
             sample_surface,
             (render_pos.x, render_pos.y, sample_size.x, sample_size.y),
+        )
+
+        # render the entity box
+        # draw a rect to an intermediary surface, then we blit with transparency
+        #   so we can see the entity behind the rect
+        rect_surface = pygame.Surface(entity.size.to_tuple(), pygame.SRCALPHA)
+        pygame.draw.rect(
+            rect_surface,
+            (255, 0, 0),
+            (
+                0,
+                0,
+                int(entity.size.x),
+                int(entity.size.y),
+            ),
+            1,
+        )
+        graphics.render_surface.blit(
+            rect_surface,
+            (
+                entity.pos.x - cam.pos.x,
+                entity.pos.y - cam.pos.y,
+                entity.size.x,
+                entity.size.y,
+            ),
         )
 
     # render a fake entity as the origin line

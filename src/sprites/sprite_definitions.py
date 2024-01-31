@@ -86,7 +86,7 @@ GOOMBA_DEAD = SeriallyStoredAnimatedSprite(
     Textures.ENTITIES,
     glm.vec2(64, 32),
     glm.vec2(16, 16),
-    glm.vec2(-2, -2),
+    glm.vec2(-2, -5),
     11,
     False,
 )
