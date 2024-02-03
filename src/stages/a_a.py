@@ -1,7 +1,12 @@
 import inspect
 import random
 import glm
-from entity_templates import goomba_template, player_template
+from entity_templates import (
+    goomba_template,
+    goombini_template,
+    goombor_template,
+    player_template,
+)
 from sprites.sprite_animator import BasicSpriteAnimator
 from sprites.sprite_definitions import FLOWER, MINI_HILL
 from stage import Decoration, Exit, Stage
@@ -45,13 +50,30 @@ def a_a():
     #     stage.entities.append(goomba)
 
     # spawn a goomba on every tile above the floor
-    for y in range(1, int(stage.dims.y) - 1):
-        for x in range(1, int(stage.dims.x) - 1):
-            tile = stage.get_tile(x, y)
-            if tile == Tile.AIR:
-                pos = glm.vec2(x, y)
-                goomba = goomba_template(pos)
-                stage.entities.append(goomba)
+    # for _ in range(1):
+    #     for y in range(1, int(stage.dims.y) - 1):
+    #         for x in range(1, int(stage.dims.x) - 1):
+    #             tile = stage.get_tile(x, y)
+    #             if tile == Tile.AIR:
+    #                 pos = glm.vec2(x, y)
+
+    #                 if random.random() < 0.7:
+    #                     template = random.choice(
+    #                         [goomba_template, goombini_template, goombor_template]
+    #                     )
+    #                     e = template(pos)
+    #                     stage.entities.append(e)
+
+    # just a test goomba
+    x = 10
+    y = 2
+    pos = glm.vec2(x, y)
+    e = goombor_template(pos)
+    stage.entities.append(e)
+    # e = goomba_template(pos)
+    # stage.entities.append(e)
+    # e = goombini_template(pos)
+    # stage.entities.append(e)
 
     player = player_template()
     player.pos.y -= 10 * TILE_SIZE
@@ -80,7 +102,7 @@ TEST_TILES_LINE_NUMBER = 78
 TEST_TILES = """
 bcaaaaaaaa
 bcaaaaaaaa
-bcaaaaaaaa
+bbbbbcaaaa
 bcaaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa
@@ -89,7 +111,7 @@ bcaaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa
-bbcaaaaaaa
+bbbbbcaaaa
 bcaaaaaaaa
 bcaaaaaaaa
 bcaaaaaaaa

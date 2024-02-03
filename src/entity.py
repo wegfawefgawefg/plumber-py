@@ -7,6 +7,8 @@ from tiles import TILE_SIZE
 class EntityType(Enum):
     PLAYER = auto()
     GOOMBA = auto()
+    GOOMBINI = auto()
+    GOOMBOR = auto()
 
 
 class DisplayState(Enum):
@@ -40,7 +42,9 @@ class Entity:
         self.has_entity_collisions = True
         self.grounded = False
         self.always_active = False
-
+        self.is_sticky_platform = (
+            False  # is true if the entity moves entities on top of it
+        )
         self.stun_timer = 0
         self.hp = 1
         self.invincible = False
@@ -64,7 +68,7 @@ def get_entity_bounds(pos, size):
 
 def get_entity_feet(pos, size):
     entity_tl, entity_br = get_entity_bounds(pos, size)
-    feet_tl = glm.vec2(entity_tl.x, entity_br.y)
+    feet_tl = glm.vec2(entity_tl.x + 1, entity_br.y)
     feet_br = entity_br + glm.vec2(0, 1)
     return feet_tl, feet_br
 

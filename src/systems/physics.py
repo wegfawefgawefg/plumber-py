@@ -5,7 +5,7 @@ from collisions import (
     do_entity_collisions_horizontal,
     do_entity_collisions_vertical,
 )
-from entity import get_entity_bounds, intersects
+from entity import get_entity_bounds, get_entity_feet, intersects
 
 from tiles import TILE_SIZE, collidable_tile_in_list
 
@@ -105,10 +105,7 @@ def set_grounded(state):
 
     # find who is grounded
     for e in state.active_entities:
-        entity_tl, entity_br = get_entity_bounds(e.pos, e.size)
-
-        feet_tl = glm.vec2(entity_tl.x, entity_br.y)
-        feet_br = entity_br + glm.vec2(0, 1)
+        feet_tl, feet_br = get_entity_feet(e.pos, e.size)
 
         # check stage floor
         if feet_br.y >= state.stage.wc_dims.y:

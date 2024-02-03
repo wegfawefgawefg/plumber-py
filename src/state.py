@@ -55,10 +55,10 @@ class State:
                 self.active_entities.append(entity)
                 continue
             entity_tl, entity_br = get_entity_bounds(entity.pos, entity.size)
-            if entity_br.x < ctl.x:
+            if entity_br.x < (ctl.x - 1):
                 continue
-            if entity_br.y < ctl.y:
-                continue
+            # if entity_br.y < ctl.y:
+            #     continue
             if entity_tl.x > cbr.x:
                 continue
             if entity_tl.y > cbr.y:

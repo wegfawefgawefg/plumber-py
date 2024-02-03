@@ -32,6 +32,7 @@ FACING_THRESHOLD = 0.2
 
 def set_facing(state):
     for entity in state.active_entities:
+        # entity.facing = Facing.LEFT
         if entity.vel.x > FACING_THRESHOLD:
             entity.facing = Facing.RIGHT
         elif entity.vel.x < -FACING_THRESHOLD:

@@ -38,7 +38,7 @@ def center_cam_on_player(state, graphics):
 
         # make sure the cam right edge doesnt go past the stage right edge
         cam_right_edge = graphics.camera.pos.x + graphics.camera.size.x
-        stage_right_edge = state.stage.wc_dims.x
+        stage_right_edge = state.stage.wc_dims.x + TILE_SIZE
         if cam_right_edge > stage_right_edge:
             graphics.camera.pos.x = stage_right_edge - graphics.camera.size.x
 

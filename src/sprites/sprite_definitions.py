@@ -91,12 +91,50 @@ GOOMBA_DEAD = SeriallyStoredAnimatedSprite(
     False,
 )
 
+GOOMBINI_WALKING = SeriallyStoredAnimatedSprite(
+    Textures.ENTITIES,
+    glm.vec2(64, 48),
+    glm.vec2(16, 16),
+    glm.vec2(-5, -9),
+    4,
+    True,
+)
+
+GOOMBINI_DEAD = SeriallyStoredAnimatedSprite(
+    Textures.ENTITIES,
+    glm.vec2(64, 64),
+    glm.vec2(16, 16),
+    glm.vec2(-5, -11),
+    11,
+    False,
+)
+
+GOOMBOR_WALKING = SeriallyStoredAnimatedSprite(
+    Textures.ENTITIES,
+    glm.vec2(64, 80),
+    glm.vec2(32, 32),
+    glm.vec2(-4, -4),
+    4,
+    True,
+)
+
+GOOMBOR_DEAD = SeriallyStoredAnimatedSprite(
+    Textures.ENTITIES,
+    glm.vec2(64, 32),
+    glm.vec2(32, 32),
+    glm.vec2(-4, -4),
+    11,
+    False,
+)
+
 
 # ////////////////////////    ENTITY SPRITE FAMILIES    ////////////////////////
 class SpriteFamily(Enum):
     PLAYER = auto()
     BAT = auto()
     GOOMBA = auto()
+    GOOMBINI = auto()
+    GOOMBOR = auto()
 
 
 def get_sprite_for_display_state_given_family(
@@ -125,6 +163,25 @@ def get_sprite_for_display_state_given_family(
                     return GOOMBA_DEAD
                 case _:
                     return GOOMBA_WALKING
+        case SpriteFamily.GOOMBINI:
+            match display_state:
+                case DisplayState.WALKING:
+                    return GOOMBINI_WALKING
+                case DisplayState.DEAD:
+                    return GOOMBINI_DEAD
+                case _:
+                    return GOOMBINI_WALKING
+        case SpriteFamily.GOOMBOR:
+            match display_state:
+                case DisplayState.WALKING:
+                    return GOOMBOR_WALKING
+                case DisplayState.DEAD:
+                    return GOOMBOR_DEAD
+                case _:
+                    return GOOMBOR_WALKING
+
+        case _:
+            raise ValueError("Invalid sprite family")
 
 
 ###################################################################################

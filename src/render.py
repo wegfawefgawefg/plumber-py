@@ -1,7 +1,7 @@
 from math import ceil
 import pygame
 import glm
-from entity import Facing
+from entity import EntityType, Facing, get_entity_feet
 from graphics import Textures
 
 from state import Mode
@@ -160,6 +160,7 @@ def render_entites(state, graphics):
             (0, 0, sample_size.x, sample_size.y),
             (sample_position.x, sample_position.y, sample_size.x, sample_size.y),
         )
+
         # flip the surface if the entity is facing right
         if entity.facing == Facing.RIGHT:
             sample_surface = pygame.transform.flip(sample_surface, True, False)
@@ -170,13 +171,10 @@ def render_entites(state, graphics):
             num_tiles_wide = ceil(sample_size.x / TILE_SIZE)
             area_width = num_tiles_wide * TILE_SIZE
 
-            flipped_render_offset = glm.vec2(
-                -(area_width - render_offset.x - sample_size.x) + 1, render_offset.y
-            )
-            # print("flipped render offset: ", flipped_render_offset)
-            render_pos = entity.pos + flipped_render_offset - cam.pos
-        else:
-            render_pos = entity.pos + render_offset - cam.pos
+            # maybe BUG: sprites may need to store their sample width, not just the sprite area widths
+            flipped_offset = -abs(area_width + render_offset.x - entity.size.x)
+            render_offset = glm.vec2(flipped_offset, render_offset.y)
+        render_pos = entity.pos + render_offset - cam.pos
 
         # blit the surface to the render surface
         graphics.render_surface.blit(
@@ -187,43 +185,62 @@ def render_entites(state, graphics):
         # render the entity box
         # draw a rect to an intermediary surface, then we blit with transparency
         #   so we can see the entity behind the rect
-        rect_surface = pygame.Surface(entity.size.to_tuple(), pygame.SRCALPHA)
+        # rect_surface = pygame.Surface(entity.size.to_tuple(), pygame.SRCALPHA)
+        # pygame.draw.rect(
+        #     rect_surface,
+        #     (255, 0, 0),
+        #     (
+        #         0,
+        #         0,
+        #         int(entity.size.x),
+        #         int(entity.size.y),
+        #     ),
+        #     1,
+        # )
+        # graphics.render_surface.blit(
+        #     rect_surface,
+        #     (
+        #         entity.pos.x - cam.pos.x,
+        #         entity.pos.y - cam.pos.y,
+        #         entity.size.x,
+        #         entity.size.y,
+        #     ),
+        # )
+
+        # draw entity feet
+        feet_tl, feet_br = get_entity_feet(entity.pos, entity.size)
+        state.debug_messages.append(f"pos: {entity.pos}")
+        state.debug_messages.append(f"feet: {feet_tl} {feet_br}")
+        feet_tl = glm.vec2(feet_tl.x, feet_tl.y) - cam.pos
+        feet_br = glm.vec2(feet_br.x, feet_br.y) - cam.pos
+        # draw rect
         pygame.draw.rect(
-            rect_surface,
-            (255, 0, 0),
+            graphics.render_surface,
+            (0, 255, 0),
             (
-                0,
-                0,
-                int(entity.size.x),
-                int(entity.size.y),
+                feet_tl.x,
+                feet_tl.y,
+                feet_br.x - feet_tl.x,
+                feet_br.y - feet_tl.y,
             ),
             1,
         )
-        graphics.render_surface.blit(
-            rect_surface,
-            (
-                entity.pos.x - cam.pos.x,
-                entity.pos.y - cam.pos.y,
-                entity.size.x,
-                entity.size.y,
-            ),
-        )
 
     # render a fake entity as the origin line
-    origin_tile_pos = glm.vec2(0, 12)
-    origin_pos = origin_tile_pos * TILE_SIZE - cam.pos
-    pygame.draw.line(
-        graphics.render_surface,
-        (0, 255, 0),
-        (origin_pos.x, origin_pos.y),
-        (origin_pos.x + 8, origin_pos.y),
-    )
-    pygame.draw.line(
-        graphics.render_surface,
-        (0, 255, 0),
-        (origin_pos.x, origin_pos.y),
-        (origin_pos.x, origin_pos.y + 8),
-    )
+    # origin_tile_pos = glm.vec2(0, 12)
+    # origin_pos = origin_tile_pos * TILE_SIZE - cam.pos
+    # pygame.draw.line(
+    #     graphics.render_surface,
+    #     (0, 255, 0),
+    #     (origin_pos.x, origin_pos.y),
+    #     (origin_pos.x + 8, origin_pos.y),
+    # )
+    # pygame.draw.line(
+    #     graphics.render_surface,
+    #     (0, 255, 0),
+    #     (origin_pos.x, origin_pos.y),
+    #     (origin_pos.x, origin_pos.y + 8),
+    # )
 
 
 def mouse_pos(graphics):
