@@ -24,7 +24,7 @@ def main():
     audio = Audio()
 
     state.load_stage(a_a())
-    # audio.events.append(PlaySong(Music.PLAY))
+    audio.events.append(PlaySong(Music.PLAY))
 
     clock = pygame.time.Clock()
     running = True

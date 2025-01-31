@@ -208,23 +208,23 @@ def render_entites(state, graphics):
         # )
 
         # draw entity feet
-        feet_tl, feet_br = get_entity_feet(entity.pos, entity.size)
-        state.debug_messages.append(f"pos: {entity.pos}")
-        state.debug_messages.append(f"feet: {feet_tl} {feet_br}")
-        feet_tl = glm.vec2(feet_tl.x, feet_tl.y) - cam.pos
-        feet_br = glm.vec2(feet_br.x, feet_br.y) - cam.pos
-        # draw rect
-        pygame.draw.rect(
-            graphics.render_surface,
-            (0, 255, 0),
-            (
-                feet_tl.x,
-                feet_tl.y,
-                feet_br.x - feet_tl.x,
-                feet_br.y - feet_tl.y,
-            ),
-            1,
-        )
+        # feet_tl, feet_br = get_entity_feet(entity.pos, entity.size)
+        # state.debug_messages.append(f"pos: {entity.pos}")
+        # state.debug_messages.append(f"feet: {feet_tl} {feet_br}")
+        # feet_tl = glm.vec2(feet_tl.x, feet_tl.y) - cam.pos
+        # feet_br = glm.vec2(feet_br.x, feet_br.y) - cam.pos
+        # # draw rect
+        # pygame.draw.rect(
+        #     graphics.render_surface,
+        #     (0, 255, 0),
+        #     (
+        #         feet_tl.x,
+        #         feet_tl.y,
+        #         feet_br.x - feet_tl.x,
+        #         feet_br.y - feet_tl.y,
+        #     ),
+        #     1,
+        # )
 
     # render a fake entity as the origin line
     # origin_tile_pos = glm.vec2(0, 12)

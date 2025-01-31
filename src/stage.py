@@ -33,6 +33,16 @@ class Decoration:
         self.sprite_animator.step()
 
 
+class SpecialDecoration(Decoration):
+    def __init__(self, pos, sprite_animator, flip=False):
+        super().__init__(pos, sprite_animator, flip)
+        self.active = False
+
+    def step(self):
+        if self.active:
+            self.sprite_animator.step()
+
+
 class Stage:
     def __init__(self):
         self.won = False
@@ -42,6 +52,7 @@ class Stage:
 
         self.foreground_decorations = []
         self.background_decorations = []
+        self.special_decorations = []
 
     @property
     def dims(self):
@@ -58,6 +69,9 @@ class Stage:
 
     def add_background_decoration(self, decoration):
         self.background_decorations.append(decoration)
+
+    def add_special_decoration(self, decoration):
+        self.special_decorations.append(decoration)
 
     def set_tiles(self, tiles):
         self.tiles = tiles

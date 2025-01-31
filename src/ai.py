@@ -115,36 +115,39 @@ class PatrolForDuration(AI):
 
 
 class ChangeDirectionWhenImpeded(AI):
-    WALK_FORCE = 0.1
+    WALK_FORCE = 0.01
 
     def __init__(self) -> None:
         super().__init__()
         self.mode: WalkLeftOrRight = random.choice(
             (WalkLeftOrRight.WALK_LEFT, WalkLeftOrRight.WALK_RIGHT)
         )
-        self.last_x_a = None
-        self.last_x_b = None
-        self.flip_store = True
+        self.old_positions = []
 
     def step(self, entity, state, graphics, audio):
-        if self.flip_store:
-            self.last_x_a = entity.pos.x
-        else:
-            self.last_x_b = entity.pos.x
-        self.flip_store = not self.flip_store
+        if len(self.old_positions) > 2:
+            self.old_positions.pop(0)
+        self.old_positions.append(int(entity.pos.x))
 
-        match self.mode:
-            case WalkLeftOrRight.WALK_LEFT:
-                entity.acc.x -= PatrolForDuration.WALK_FORCE
-            case WalkLeftOrRight.WALK_RIGHT:
-                entity.acc.x += PatrolForDuration.WALK_FORCE
+        # state.debug_messages.append(f"old positions: {self.old_positions}")
+        # state.debug_messages.append(f"vel: {entity.vel.x}")
 
-        if self.last_x_a is not None and self.last_x_b is not None:
-            if self.last_x_a == self.last_x_b:
+        vel_clause = abs(entity.vel.x) < 0.001
+        old_positions_clause = len(self.old_positions) == 3
+        # state.debug_messages.append(f"vel clause: {vel_clause}")
+        # state.debug_messages.append(f"old positions clause: {old_positions_clause}")
+        if vel_clause and old_positions_clause:
+            all_equal = all(x == self.old_positions[0] for x in self.old_positions)
+            if all_equal:
                 match self.mode:
                     case WalkLeftOrRight.WALK_LEFT:
                         self.mode = WalkLeftOrRight.WALK_RIGHT
                     case WalkLeftOrRight.WALK_RIGHT:
                         self.mode = WalkLeftOrRight.WALK_LEFT
-                self.last_x_a = None
-                self.last_x_b = None
+                self.old_positions.clear()
+
+        match self.mode:
+            case WalkLeftOrRight.WALK_LEFT:
+                entity.acc.x -= ChangeDirectionWhenImpeded.WALK_FORCE
+            case WalkLeftOrRight.WALK_RIGHT:
+                entity.acc.x += ChangeDirectionWhenImpeded.WALK_FORCE

@@ -208,3 +208,12 @@ BIG_PIPE = StaticSprite(
     glm.vec2(16, 16),
     glm.vec2(32, 32),
 )
+
+SUN = SeriallyStoredAnimatedSprite(
+    Textures.DECORATIONS,
+    glm.vec2(0, 48),
+    glm.vec2(48, 48),
+    glm.vec2(0, 0),
+    2,
+    True,
+)
