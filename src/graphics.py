@@ -11,6 +11,7 @@ from tiles import TILE_SIZE
 class Camera:
     def __init__(self, size):
         self.pos = glm.vec2(0, 0)
+        self.prev_pos = glm.vec2(self.pos)
         self.size = size
 
     def set_center(self, pos):
@@ -26,6 +27,7 @@ class Graphics:
         self.window_size = self.render_resolution * 4
         self.camera = Camera(glm.vec2(16 * TILE_SIZE, 9 * TILE_SIZE))
         self.camera.set_center(glm.vec2(8 * TILE_SIZE, 10 * TILE_SIZE))
+        self.camera.prev_pos = glm.vec2(self.camera.pos)
 
         self.window = pygame.display.set_mode(self.window_size.to_tuple())
         self.render_surface = pygame.Surface(self.render_resolution.to_tuple())

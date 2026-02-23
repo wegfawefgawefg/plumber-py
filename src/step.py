@@ -23,12 +23,11 @@ from systems.physics import (
     zero_accelerations,
 )
 from systems.progression import exit_if_player_hits_exit_tile
-from physics_trace import log_physics_state
 
 
 def step_playing(state, graphics, audio):
+    state.snapshot_previous_transforms(graphics)
     state.set_active_entities(graphics.camera)
-    log_physics_state(state.frame, "pre_step", state, graphics)
 
     #### PRE STEP
     # control_camera(state, graphics)
@@ -45,7 +44,6 @@ def step_playing(state, graphics, audio):
     ### POST STEP
     speed_limit_controlled_entities(state)
     physics_post_step(state)
-    log_physics_state(state.frame, "post_physics", state, graphics)
 
     set_facing(state)
     step_sprite_animators(state, graphics)

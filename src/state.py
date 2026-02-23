@@ -1,4 +1,5 @@
 from enum import Enum, auto
+import glm
 from entity import get_entity_bounds
 
 from stage import Stage
@@ -25,6 +26,7 @@ class State:
     def __init__(self) -> None:
         self.mode = Mode.PLAYING
         self.frame = 0
+        self.render_alpha = 1.0
 
         self.entities = []
         self.active_entities = []
@@ -65,3 +67,8 @@ class State:
             if entity_tl.y > cbr.y:
                 continue
             self.active_entities.append(entity)
+
+    def snapshot_previous_transforms(self, graphics):
+        for entity in self.entities:
+            entity.prev_pos = glm.vec2(entity.pos)
+        graphics.camera.prev_pos = glm.vec2(graphics.camera.pos)

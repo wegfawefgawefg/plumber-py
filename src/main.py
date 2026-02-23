@@ -9,7 +9,7 @@ from graphics import Graphics
 from stages.a_a import a_a
 from state import State
 from audio import Audio, Music, PlaySong
-from physics_trace import TRACE_PATH, reset_physics_trace_file
+from physics.time_step import FixedStepAccumulator
 from step import step
 
 pygame.init()
@@ -25,14 +25,14 @@ def main():
     audio = Audio()
 
     state.load_stage(a_a())
+    state.snapshot_previous_transforms(graphics)
     audio.events.append(PlaySong(Music.PLAY))
-    reset_physics_trace_file()
-    print(f"Physics trace file: {TRACE_PATH}")
 
+    fixed_step = FixedStepAccumulator()
     clock = pygame.time.Clock()
     running = True
     while running:
-        clock.tick(60)
+        elapsed_seconds = clock.tick(0) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (
                 event.type == pygame.KEYDOWN
@@ -41,10 +41,14 @@ def main():
                 running = False
 
         process_inputs(state)
-        step(state, graphics, audio)
+        fixed_step.add_elapsed(elapsed_seconds)
+        simulation_steps = fixed_step.consume_steps()
+        for _ in range(simulation_steps):
+            step(state, graphics, audio)
+        state.render_alpha = fixed_step.alpha()
 
         graphics.render_surface.fill((0, 0, 0))
-        render(state, graphics)
+        render(state, graphics, state.render_alpha)
         graphics.blit_render_surface_to_window()
         meta_render(state, graphics)
 

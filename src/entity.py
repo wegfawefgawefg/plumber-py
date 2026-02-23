@@ -30,6 +30,7 @@ class Entity:
     def __init__(self) -> None:
         self.type = None
         self.pos = glm.vec2(6, 6)
+        self.prev_pos = glm.vec2(self.pos)
         self.size = glm.vec2(8, 8)
         self.vel = glm.vec2(0, 0)
         self.acc = glm.vec2(0, 0)

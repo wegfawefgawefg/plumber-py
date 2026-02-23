@@ -45,5 +45,5 @@ py-modules = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["sprites*", "stages*", "systems*"]
+include = ["physics*", "sprites*", "stages*", "systems*"]
 namespaces = true

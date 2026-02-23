@@ -8,12 +8,24 @@ from state import Mode
 from tiles import TILE_SIZE, get_tile_texture_sample_position, is_tile_transparent
 
 
-def render_playing(state, graphics):
-    render_tiles(state, graphics)
-    render_background_decorations(state, graphics)
+def _lerp_vec2(a, b, alpha):
+    return a + (b - a) * alpha
+
+
+def _camera_pos(graphics, alpha):
+    return _lerp_vec2(graphics.camera.prev_pos, graphics.camera.pos, alpha)
+
+
+def _entity_render_pos(entity, alpha):
+    return _lerp_vec2(entity.prev_pos, entity.pos, alpha)
+
+
+def render_playing(state, graphics, alpha):
+    render_tiles(state, graphics, alpha)
+    render_background_decorations(state, graphics, alpha)
     # render_crosshair(state, graphics)
-    render_entites(state, graphics)
-    render_foreground_decorations(state, graphics)
+    render_entites(state, graphics, alpha)
+    render_foreground_decorations(state, graphics, alpha)
     render_alerts(state, graphics)
     render_ui(state, graphics)
 
@@ -40,17 +52,18 @@ def render_pause(state, graphics):
     pass
 
 
-def render(state, graphics):
+def render(state, graphics, alpha=1.0):
     match state.mode:
         case Mode.PLAYING:
-            render_playing(state, graphics)
+            render_playing(state, graphics, alpha)
         case Mode.PAUSE:
             render_pause(state, graphics)
 
 
-def render_tiles(state, graphics):
+def render_tiles(state, graphics, alpha):
     cam = graphics.camera
-    tl = cam.pos
+    cam_pos = _camera_pos(graphics, alpha)
+    tl = cam_pos
     br = tl + cam.size
 
     tl_tile = tl // TILE_SIZE
@@ -65,7 +78,7 @@ def render_tiles(state, graphics):
 
             sample_pos = get_tile_texture_sample_position(tile) * TILE_SIZE
 
-            render_pos = glm.vec2(x, y) * TILE_SIZE - cam.pos
+            render_pos = glm.vec2(x, y) * TILE_SIZE - cam_pos
             # if tile is transparent, render an air beneath it
             if is_tile_transparent(tile):
                 graphics.render_surface.blit(
@@ -80,17 +93,20 @@ def render_tiles(state, graphics):
             )
 
 
-def render_background_decorations(state, graphics):
-    render_decorations(state, graphics, state.stage.background_decorations, tint=True)
+def render_background_decorations(state, graphics, alpha):
+    render_decorations(
+        state, graphics, state.stage.background_decorations, alpha, tint=True
+    )
 
 
-def render_foreground_decorations(state, graphics):
-    render_decorations(state, graphics, state.stage.foreground_decorations)
+def render_foreground_decorations(state, graphics, alpha):
+    render_decorations(state, graphics, state.stage.foreground_decorations, alpha)
 
 
-def render_decorations(state, graphics, decorations, tint=False):
+def render_decorations(state, graphics, decorations, alpha, tint=False):
     cam = graphics.camera
-    tl = cam.pos
+    cam_pos = _camera_pos(graphics, alpha)
+    tl = cam_pos
     br = tl + cam.size
 
     decorations_texture = graphics.assets.get(Textures.DECORATIONS)
@@ -123,7 +139,7 @@ def render_decorations(state, graphics, decorations, tint=False):
             )
         if decoration.flip:
             decoration_surface = pygame.transform.flip(decoration_surface, True, False)
-        render_pos = decoration.pos + render_offset - cam.pos
+        render_pos = decoration.pos + render_offset - cam_pos
 
         graphics.render_surface.blit(
             decoration_surface,
@@ -132,15 +148,17 @@ def render_decorations(state, graphics, decorations, tint=False):
         )
 
 
-def render_entites(state, graphics):
+def render_entites(state, graphics, alpha):
     cam = graphics.camera
-    tl = cam.pos
-    br = cam.pos + cam.size
+    cam_pos = _camera_pos(graphics, alpha)
+    tl = cam_pos
+    br = cam_pos + cam.size
 
     entities_texture = graphics.assets.get(Textures.ENTITIES)
     for entity in state.entities:
-        entity_tl = entity.pos
-        entity_br = entity.pos + entity.size
+        entity_pos = _entity_render_pos(entity, alpha)
+        entity_tl = entity_pos
+        entity_br = entity_pos + entity.size
 
         if entity_br.x < tl.x or entity_tl.x > br.x:
             continue
@@ -174,7 +192,7 @@ def render_entites(state, graphics):
             # maybe BUG: sprites may need to store their sample width, not just the sprite area widths
             flipped_offset = -abs(area_width + render_offset.x - entity.size.x)
             render_offset = glm.vec2(flipped_offset, render_offset.y)
-        render_pos = entity.pos + render_offset - cam.pos
+        render_pos = entity_pos + render_offset - cam_pos
 
         # blit the surface to the render surface
         graphics.render_surface.blit(
