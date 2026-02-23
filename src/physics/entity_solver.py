@@ -133,12 +133,20 @@ def resolve_entity_overlaps_on_axis(state, axis):
                             else:
                                 a.pos.y += a_dir * fallback
 
+                # Preserve momentum for entity-entity contacts. We only kill
+                # axis velocity when a body is actually blocked by tiles.
+                a_tile_blocked = abs(a_target - a_moved) > POSITION_EPSILON
+                b_tile_blocked = abs(b_target - b_moved) > POSITION_EPSILON
                 if axis == "x":
-                    a.vel.x = 0.0
-                    b.vel.x = 0.0
+                    if a_tile_blocked:
+                        a.vel.x = 0.0
+                    if b_tile_blocked:
+                        b.vel.x = 0.0
                 else:
-                    a.vel.y = 0.0
-                    b.vel.y = 0.0
+                    if a_tile_blocked:
+                        a.vel.y = 0.0
+                    if b_tile_blocked:
+                        b.vel.y = 0.0
 
         if not any_overlap:
             break
