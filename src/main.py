@@ -9,6 +9,7 @@ from graphics import Graphics
 from stages.a_a import a_a
 from state import State
 from audio import Audio, Music, PlaySong
+from physics_trace import TRACE_PATH, reset_physics_trace_file
 from step import step
 
 pygame.init()
@@ -25,6 +26,8 @@ def main():
 
     state.load_stage(a_a())
     audio.events.append(PlaySong(Music.PLAY))
+    reset_physics_trace_file()
+    print(f"Physics trace file: {TRACE_PATH}")
 
     clock = pygame.time.Clock()
     running = True

@@ -24,6 +24,7 @@ def step_and_cleanse(collection):
 class State:
     def __init__(self) -> None:
         self.mode = Mode.PLAYING
+        self.frame = 0
 
         self.entities = []
         self.active_entities = []
