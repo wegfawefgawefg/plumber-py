@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "plumber-py"
+version = "0.1.0"
+description = "Mayro in Python"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "numpy==1.26.3",
+  "pillow==10.2.0",
+  "pygame==2.5.2",
+  "PyGLM==2.7.1",
+  "small-ass-cache==0.9.2",
+]
+
+[tool.uv]
+package = true
+
+[project.scripts]
+plumber-py = "main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = [
+  "ai",
+  "audio",
+  "collisions",
+  "components",
+  "entity",
+  "entity_templates",
+  "events",
+  "graphics",
+  "inputs",
+  "main",
+  "process_inputs",
+  "render",
+  "stage",
+  "state",
+  "step",
+  "tiles",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sprites*", "stages*", "systems*"]
+namespaces = true
