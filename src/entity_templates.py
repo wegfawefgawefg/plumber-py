@@ -38,6 +38,8 @@ def player_template():
     player.always_active = True
 
     player.has_entity_collisions = True
+    player.can_push_entities = True
+    player.can_be_pushed = True
     return player
 
 
@@ -56,6 +58,7 @@ def goomba_template(tile_pos):
     )
     goomba.input_controlled = False
     goomba.has_entity_collisions = True
+    goomba.can_be_pushed = True
     # goomba.ai = WalkRandomlySometimes()
     # goomba.ai = PatrolForDuration()
     goomba.ai = ChangeDirectionWhenImpeded()
@@ -81,6 +84,7 @@ def goombini_template(tile_pos):
     )
     goombini.input_controlled = False
     goombini.has_entity_collisions = True
+    goombini.can_be_pushed = True
     # goombini.ai = WalkRandomlySometimes()
     goombini.ai = PatrolForDuration()
     goombini.hp = 1
@@ -104,6 +108,7 @@ def goombor_template(tile_pos):
     )
     goombor.input_controlled = False
     goombor.has_entity_collisions = True
+    goombor.can_be_pushed = True
     goombor.ai = ChangeDirectionWhenImpeded()
     goombor.hp = 1
     goombor.facing = random.choice((Facing.LEFT, Facing.RIGHT))

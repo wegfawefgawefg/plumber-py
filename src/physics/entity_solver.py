@@ -1,5 +1,8 @@
+import math
+from collections import defaultdict
+
 from physics.config import (
-    ENTITY_DEPENETRATION_ITERATIONS,
+    ENTITY_BROADPHASE_CELL_SIZE,
     POSITION_EPSILON,
 )
 from physics.contact import register_entity_contact
@@ -44,113 +47,152 @@ def _zero_velocity_into_entity_contact(axis, entity, separation_dir):
             entity.vel.y = 0.0
 
 
+def _entities_should_collide(a, b):
+    # Explicit push policy: resolve only pairs where one side can push and
+    # the other side can be pushed.
+    return (a.can_push_entities and b.can_be_pushed) or (
+        b.can_push_entities and a.can_be_pushed
+    )
+
+
+def _full_displacement_targets(axis, a, b, overlap, a_dir, b_dir):
+    a_pushes_b = a.can_push_entities and b.can_be_pushed
+    b_pushes_a = b.can_push_entities and a.can_be_pushed
+
+    if a_pushes_b and not b_pushes_a:
+        return 0.0, b_dir * overlap
+    if b_pushes_a and not a_pushes_b:
+        return a_dir * overlap, 0.0
+
+    # If both can push each other, choose a single pusher by larger axis speed.
+    a_axis_speed = abs(a.vel.x) if axis == "x" else abs(a.vel.y)
+    b_axis_speed = abs(b.vel.x) if axis == "x" else abs(b.vel.y)
+    if a_axis_speed >= b_axis_speed:
+        return 0.0, b_dir * overlap
+    return a_dir * overlap, 0.0
+
+
+def _candidate_pair_indices(collidable):
+    buckets = defaultdict(list)
+    cell_size = ENTITY_BROADPHASE_CELL_SIZE
+
+    for index, entity in enumerate(collidable):
+        min_x = int(math.floor(entity.pos.x / cell_size))
+        max_x = int(
+            math.floor((entity.pos.x + entity.size.x - POSITION_EPSILON) / cell_size)
+        )
+        min_y = int(math.floor(entity.pos.y / cell_size))
+        max_y = int(
+            math.floor((entity.pos.y + entity.size.y - POSITION_EPSILON) / cell_size)
+        )
+
+        for cy in range(min_y, max_y + 1):
+            for cx in range(min_x, max_x + 1):
+                buckets[(cx, cy)].append(index)
+
+    pairs = set()
+    for indices in buckets.values():
+        if len(indices) < 2:
+            continue
+        for a_i in range(len(indices) - 1):
+            i = indices[a_i]
+            for b_i in range(a_i + 1, len(indices)):
+                j = indices[b_i]
+                if i == j:
+                    continue
+                if i < j:
+                    pairs.add((i, j))
+                else:
+                    pairs.add((j, i))
+
+    return sorted(
+        (i, j)
+        for i, j in pairs
+        if _entities_should_collide(collidable[i], collidable[j])
+    )
+
+
 def resolve_entity_overlaps_on_axis(state, axis):
     collidable = [e for e in state.active_entities if e.has_entity_collisions]
     if len(collidable) < 2:
         return
 
-    for _ in range(ENTITY_DEPENETRATION_ITERATIONS):
+    # Full-displacement policy resolves each overlap in one pass.
+    for _ in range(1):
         any_overlap = False
+        pair_indices = _candidate_pair_indices(collidable)
+        if not pair_indices:
+            break
 
-        for i in range(len(collidable)):
-            for j in range(i + 1, len(collidable)):
-                a = collidable[i]
-                b = collidable[j]
+        for i, j in pair_indices:
+            a = collidable[i]
+            b = collidable[j]
 
-                ox = _axis_overlap(a, b, "x")
-                oy = _axis_overlap(a, b, "y")
-                if ox <= 0.0 or oy <= 0.0:
+            ox = _axis_overlap(a, b, "x")
+            oy = _axis_overlap(a, b, "y")
+            if ox <= 0.0 or oy <= 0.0:
+                continue
+
+            if axis == "x":
+                if ox > oy + POSITION_EPSILON:
                     continue
+                overlap = ox
+            else:
+                if oy > ox + POSITION_EPSILON:
+                    continue
+                overlap = oy
 
+            any_overlap = True
+
+            a_dir, b_dir = _axis_separation_directions(a, b, axis)
+            register_entity_contact(state, a, b, axis, a_dir, b_dir)
+            a_target, b_target = _full_displacement_targets(
+                axis, a, b, overlap, a_dir, b_dir
+            )
+
+            a_moved = a_target
+            b_moved = b_target
+            if a.has_tile_collisions:
+                a_moved, _ = move_entity_along_axis_against_tiles(
+                    state, a, axis, a_target
+                )
+            else:
                 if axis == "x":
-                    if ox > oy + POSITION_EPSILON:
-                        continue
-                    overlap = ox
+                    a.pos.x += a_target
                 else:
-                    if oy > ox + POSITION_EPSILON:
-                        continue
-                    overlap = oy
+                    a.pos.y += a_target
 
-                any_overlap = True
-
-                a_dir, b_dir = _axis_separation_directions(a, b, axis)
-                register_entity_contact(state, a, b, axis, a_dir, b_dir)
-                a_share, b_share = 0.5, 0.5
-                # For entity-entity contacts we resolve to exact touching.
-                # Adding epsilon here creates a tiny physical gap that can
-                # rasterize as a visible 1px hover at render time.
-                correction = overlap
-
-                a_target = a_dir * correction * a_share
-                b_target = b_dir * correction * b_share
-
-                a_moved = a_target
-                b_moved = b_target
-                if a.has_tile_collisions:
-                    a_moved, _ = move_entity_along_axis_against_tiles(
-                        state, a, axis, a_target
-                    )
-                else:
-                    if axis == "x":
-                        a.pos.x += a_target
-                    else:
-                        a.pos.y += a_target
-
-                if b.has_tile_collisions:
-                    b_moved, _ = move_entity_along_axis_against_tiles(
-                        state, b, axis, b_target
-                    )
-                else:
-                    if axis == "x":
-                        b.pos.x += b_target
-                    else:
-                        b.pos.y += b_target
-
-                remaining = _axis_overlap(a, b, axis)
-                if remaining > POSITION_EPSILON:
-                    fallback = remaining
-                    if abs(a_target - a_moved) > POSITION_EPSILON:
-                        if b.has_tile_collisions:
-                            move_entity_along_axis_against_tiles(
-                                state, b, axis, b_dir * fallback
-                            )
-                        else:
-                            if axis == "x":
-                                b.pos.x += b_dir * fallback
-                            else:
-                                b.pos.y += b_dir * fallback
-                    if abs(b_target - b_moved) > POSITION_EPSILON:
-                        if a.has_tile_collisions:
-                            move_entity_along_axis_against_tiles(
-                                state, a, axis, a_dir * fallback
-                            )
-                        else:
-                            if axis == "x":
-                                a.pos.x += a_dir * fallback
-                            else:
-                                a.pos.y += a_dir * fallback
-
-                # Preserve horizontal momentum for entity-entity contacts to keep
-                # pushing behavior natural. Vertical velocity is still canceled
-                # when penetrating into another body so gravity doesn't accumulate
-                # while standing on moving entities.
-                _zero_velocity_into_entity_contact(axis, a, a_dir)
-                _zero_velocity_into_entity_contact(axis, b, b_dir)
-
-                # Still kill axis velocity when depenetration against tiles blocks
-                # the intended correction.
-                a_tile_blocked = abs(a_target - a_moved) > POSITION_EPSILON
-                b_tile_blocked = abs(b_target - b_moved) > POSITION_EPSILON
+            if b.has_tile_collisions:
+                b_moved, _ = move_entity_along_axis_against_tiles(
+                    state, b, axis, b_target
+                )
+            else:
                 if axis == "x":
-                    if a_tile_blocked:
-                        a.vel.x = 0.0
-                    if b_tile_blocked:
-                        b.vel.x = 0.0
+                    b.pos.x += b_target
                 else:
-                    if a_tile_blocked:
-                        a.vel.y = 0.0
-                    if b_tile_blocked:
-                        b.vel.y = 0.0
+                    b.pos.y += b_target
+
+            # Preserve horizontal momentum for entity-entity contacts to keep
+            # pushing behavior natural. Vertical velocity is still canceled
+            # when penetrating into another body so gravity doesn't accumulate
+            # while standing on moving entities.
+            _zero_velocity_into_entity_contact(axis, a, a_dir)
+            _zero_velocity_into_entity_contact(axis, b, b_dir)
+
+            # Still kill axis velocity when depenetration against tiles blocks
+            # the intended correction.
+            a_tile_blocked = abs(a_target - a_moved) > POSITION_EPSILON
+            b_tile_blocked = abs(b_target - b_moved) > POSITION_EPSILON
+            if axis == "x":
+                if a_tile_blocked:
+                    a.vel.x = 0.0
+                if b_tile_blocked:
+                    b.vel.x = 0.0
+            else:
+                if a_tile_blocked:
+                    a.vel.y = 0.0
+                if b_tile_blocked:
+                    b.vel.y = 0.0
 
         if not any_overlap:
             break

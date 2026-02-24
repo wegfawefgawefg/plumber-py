@@ -49,6 +49,8 @@ class Stage:
         self.entities = []
         self.exits = {}
         self.tiles = None
+        self._dims = glm.ivec2(0, 0)
+        self._wc_dims = glm.vec2(0, 0)
 
         self.foreground_decorations = []
         self.background_decorations = []
@@ -57,12 +59,12 @@ class Stage:
     @property
     def dims(self):
         """Returns the dimensions of the stage in tile coordinates"""
-        return glm.vec2(len(self.tiles[0]), len(self.tiles))
+        return self._dims
 
     @property
     def wc_dims(self):
         """Returns the dimensions of the stage in world coordinates"""
-        return self.dims * TILE_SIZE
+        return self._wc_dims
 
     def add_foreground_decoration(self, decoration):
         self.foreground_decorations.append(decoration)
@@ -75,6 +77,8 @@ class Stage:
 
     def set_tiles(self, tiles):
         self.tiles = tiles
+        self._dims = glm.ivec2(len(tiles[0]), len(tiles))
+        self._wc_dims = self._dims * TILE_SIZE
 
     def add_exit(self, pos, goes_to, level_win=False):
         print(self.dims)

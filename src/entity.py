@@ -41,6 +41,8 @@ class Entity:
         self.facing = Facing.RIGHT
         self.has_tile_collisions = True
         self.has_entity_collisions = True
+        self.can_push_entities = False
+        self.can_be_pushed = False
         self.grounded = False
         self.always_active = False
         self.is_sticky_platform = (
