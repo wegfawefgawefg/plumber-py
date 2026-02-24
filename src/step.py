@@ -2,10 +2,9 @@ import pygame
 from audio import handle_audio_events
 from entity import EntityType
 from events import handle_events
-from physics.contact import EntityContactEvent, TileContactEvent
 from render import mouse_pos
 
-from state import Message, Mode
+from state import Mode
 import systems
 from systems.ai import step_ai
 from systems.animations import set_facing, step_sprite_animators, update_display_states
@@ -24,81 +23,6 @@ from systems.physics import (
     zero_accelerations,
 )
 from systems.progression import exit_if_player_hits_exit_tile
-
-
-CONTACT_START_COLOR = (96, 220, 128)
-CONTACT_COLOR = (255, 224, 96)
-CONTACT_END_COLOR = (255, 120, 120)
-
-
-def _physics_contact_key_and_label(event):
-    if isinstance(event, TileContactEvent):
-        key = (
-            "tile",
-            event.entity_index,
-            event.entity_type,
-            event.tile_coord[0],
-            event.tile_coord[1],
-            event.side,
-        )
-        label = (
-            f"tile {event.entity_type}[{event.entity_index}] {event.side}"
-            f" @{event.tile_coord}"
-        )
-        return key, label
-
-    if isinstance(event, EntityContactEvent):
-        ai = event.entity_a_index
-        bi = event.entity_b_index
-        at = event.entity_a_type
-        bt = event.entity_b_type
-        as_ = event.side_a
-        bs_ = event.side_b
-
-        if ai > bi:
-            ai, bi = bi, ai
-            at, bt = bt, at
-            as_, bs_ = bs_, as_
-
-        key = ("entity", ai, at, bi, bt, event.axis, as_, bs_)
-        label = f"entity {at}[{ai}] {as_} <-> {bt}[{bi}] {bs_} axis={event.axis}"
-        return key, label
-
-    return None, None
-
-
-def _emit_physics_contact_alerts(state):
-    current_labels = {}
-    for event in state.physics_events:
-        key, label = _physics_contact_key_and_label(event)
-        if key is None:
-            continue
-        current_labels[key] = label
-
-    current_keys = set(current_labels.keys())
-    previous_keys = state._physics_contacts_last_step
-    previous_labels = state._physics_contact_last_labels
-
-    start_keys = current_keys - previous_keys
-    stay_keys = current_keys & previous_keys
-    end_keys = previous_keys - current_keys
-
-    for key in sorted(start_keys, key=str):
-        state.alerts.append(
-            Message(f"[contact_start] {current_labels[key]}", 12, CONTACT_START_COLOR)
-        )
-
-    for key in sorted(stay_keys, key=str):
-        state.alerts.append(
-            Message(f"[contact] {current_labels[key]}", 1, CONTACT_COLOR)
-        )
-
-    for key in sorted(end_keys, key=str):
-        label = previous_labels.get(key, str(key))
-        state.alerts.append(Message(f"[contact_end] {label}", 12, CONTACT_END_COLOR))
-
-    state._physics_contacts_last_step = current_keys
-    state._physics_contact_last_labels = current_labels
 
 
 def step_playing(state, graphics, audio):
@@ -120,7 +44,6 @@ def step_playing(state, graphics, audio):
     ### POST STEP
     speed_limit_controlled_entities(state)
     physics_post_step(state)
-    _emit_physics_contact_alerts(state)
 
     set_facing(state)
     step_sprite_animators(state, graphics)

@@ -24,37 +24,42 @@ from stages.stages import Stages
 from tiles import TILE_SIZE, Tile, is_tile_collidable
 
 
+TEST_ARENA_WIDTH_TILES = 32
+TEST_ARENA_HEIGHT_TILES = 16
+
+
+def _enclosed_arena_tiles(width_tiles, height_tiles):
+    tiles = [[Tile.AIR for _ in range(width_tiles)] for _ in range(height_tiles)]
+
+    for x in range(width_tiles):
+        tiles[0][x] = Tile.DIRT
+        tiles[height_tiles - 1][x] = Tile.DIRT
+
+    for y in range(height_tiles):
+        tiles[y][0] = Tile.DIRT
+        tiles[y][width_tiles - 1] = Tile.DIRT
+
+    return tiles
+
+
+def _spawn_goomba_swarm(stage, width_tiles, height_tiles):
+    for ty in range(2, height_tiles - 2, 2):
+        for tx in range(5, width_tiles - 2, 2):
+            stage.entities.append(goomba_template(glm.vec2(tx, ty)))
+
+
 def a_a():
     stage = Stage()
 
     ####    TILES   ####
-    # t = parse_map_tiles_string(A_A_TILES, A_A_TILES_LINE_NUMBER)
-    t = parse_map_tiles_string(TEST_TILES, TEST_TILES_LINE_NUMBER)
-    # t = air(stage_width)
-    # t = floor(t, floor_level, Tile.CAPPED_DIRT, Tile.DIRT)
-    # t = random_bumps(t, 13, 0.1)
-    # t = random_bumps(t, 10, 0.1)
+    t = _enclosed_arena_tiles(TEST_ARENA_WIDTH_TILES, TEST_ARENA_HEIGHT_TILES)
     stage.set_tiles(t)
 
     ####    ENTITIES    ####
     player = player_template()
+    player.pos = glm.vec2(2 * TILE_SIZE, 2 * TILE_SIZE)
     stage.entities.append(player)
-
-    # just a test goomba
-    x = 10
-    y = 2
-    pos = glm.vec2(x, y)
-    e = goombor_template(pos)
-    e.facing = Facing.LEFT
-    stage.entities.append(e)
-    # e = goomba_template(pos)
-    # stage.entities.append(e)
-    # e = goombini_template(pos)
-    # stage.entities.append(e)
-
-    # player = player_template()
-    # player.pos.y -= 10 * TILE_SIZE
-    # stage.entities.append(player)
+    _spawn_goomba_swarm(stage, TEST_ARENA_WIDTH_TILES, TEST_ARENA_HEIGHT_TILES)
 
     ####    EXITS   ####
     # stage.add_exit(glm.ivec2(15, 7), Stages.A_A, level_win=True)

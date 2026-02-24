@@ -3,6 +3,7 @@ import glm
 from entity import get_entity_bounds
 
 from stage import Stage
+from tiles import TILE_SIZE
 
 
 class Mode(Enum):
@@ -36,8 +37,6 @@ class State:
         self.events = []
         self.physics_events = []
         self._physics_event_keys = set()
-        self._physics_contacts_last_step = set()
-        self._physics_contact_last_labels = {}
         self.special_effects = []
 
         self.debug_messages: list[str] = []
@@ -48,8 +47,6 @@ class State:
     def load_stage(self, stage):
         self.stage = stage
         self.entities = stage.entities
-        self._physics_contacts_last_step.clear()
-        self._physics_contact_last_labels.clear()
 
     def step_alerts(self):
         self.alerts = step_and_cleanse(self.alerts)
@@ -63,19 +60,20 @@ class State:
 
         ctl = camera.pos
         cbr = camera.pos + camera.size
+        padding = TILE_SIZE
 
         for entity in self.entities:
             if entity.always_active:
                 self.active_entities.append(entity)
                 continue
             entity_tl, entity_br = get_entity_bounds(entity.pos, entity.size)
-            if entity_br.x < (ctl.x - 1):
+            if entity_br.x < (ctl.x - padding):
                 continue
-            # if entity_br.y < ctl.y:
-            #     continue
-            if entity_tl.x > cbr.x:
+            if entity_br.y < (ctl.y - padding):
                 continue
-            if entity_tl.y > cbr.y:
+            if entity_tl.x > (cbr.x + padding):
+                continue
+            if entity_tl.y > (cbr.y + padding):
                 continue
             self.active_entities.append(entity)
 

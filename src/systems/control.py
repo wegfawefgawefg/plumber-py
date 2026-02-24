@@ -24,23 +24,30 @@ def center_cam_on_player(state, graphics):
     if len(player_entities) == 0:
         return
     xs = [e.pos.x + e.size.x / 2 for e in player_entities]
+    ys = [e.pos.y + e.size.y / 2 for e in player_entities]
     x = sum(xs, 0) / len(xs)
-    x = int(x) + TILE_SIZE // 2
-    y = TILE_SIZE * 4.5
+    y = sum(ys, 0) / len(ys)
     p = glm.vec2(x, y)
     graphics.camera.set_center(p)
 
-    # if the stage is bigger than or equal to the cam size
+    # Clamp camera to stage bounds on both axes.
     if state.stage.wc_dims.x >= graphics.camera.size.x:
-        # make sure the cam pos doesnt go left of 0,0
         if graphics.camera.pos.x < 0:
             graphics.camera.pos.x = 0
 
-        # make sure the cam right edge doesnt go past the stage right edge
         cam_right_edge = graphics.camera.pos.x + graphics.camera.size.x
         stage_right_edge = state.stage.wc_dims.x + TILE_SIZE
         if cam_right_edge > stage_right_edge:
             graphics.camera.pos.x = stage_right_edge - graphics.camera.size.x
+
+    if state.stage.wc_dims.y >= graphics.camera.size.y:
+        if graphics.camera.pos.y < 0:
+            graphics.camera.pos.y = 0
+
+        cam_bottom_edge = graphics.camera.pos.y + graphics.camera.size.y
+        stage_bottom_edge = state.stage.wc_dims.y
+        if cam_bottom_edge > stage_bottom_edge:
+            graphics.camera.pos.y = stage_bottom_edge - graphics.camera.size.y
 
 
 WALK_FORCE = 0.2
