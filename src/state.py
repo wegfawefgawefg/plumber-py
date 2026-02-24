@@ -11,9 +11,10 @@ class Mode(Enum):
 
 
 class Message:
-    def __init__(self, text, lifetime) -> None:
+    def __init__(self, text, lifetime, color=(255, 255, 255)) -> None:
         self.text = text
         self.lifetime = lifetime
+        self.color = color
 
 
 def step_and_cleanse(collection):
@@ -35,6 +36,8 @@ class State:
         self.events = []
         self.physics_events = []
         self._physics_event_keys = set()
+        self._physics_contacts_last_step = set()
+        self._physics_contact_last_labels = {}
         self.special_effects = []
 
         self.debug_messages: list[str] = []
@@ -45,6 +48,8 @@ class State:
     def load_stage(self, stage):
         self.stage = stage
         self.entities = stage.entities
+        self._physics_contacts_last_step.clear()
+        self._physics_contact_last_labels.clear()
 
     def step_alerts(self):
         self.alerts = step_and_cleanse(self.alerts)

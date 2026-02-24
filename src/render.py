@@ -28,7 +28,6 @@ def render_playing(state, graphics, alpha):
     # render_crosshair(state, graphics)
     render_entites(state, graphics, alpha)
     render_foreground_decorations(state, graphics, alpha)
-    render_alerts(state, graphics)
     render_ui(state, graphics)
 
 
@@ -264,8 +263,8 @@ def render_ui(state, graphics):
 
 
 def meta_render(state, graphics):
-    render_debug_messages(state, graphics)
-    pass
+    debug_bottom = render_debug_messages(state, graphics)
+    render_alerts(state, graphics, start_y=debug_bottom + 8)
 
 
 def render_debug_messages(state, graphics):
@@ -281,24 +280,23 @@ def render_debug_messages(state, graphics):
         graphics.window.blit(font_surface, cursor.to_tuple())
 
         cursor.y += font.get_height()
+    return cursor.y
 
 
-def render_alerts(state, graphics):
+def render_alerts(state, graphics, start_y=0):
     # sort by the lifetime
     state.alerts.sort(
         key=lambda alert: alert.lifetime,
         reverse=True,
     )
 
-    # half width
-    half_width = graphics.render_resolution.x / 2
-    cursor = glm.vec2(half_width, 0)
+    cursor = glm.vec2(12, start_y)
     for alert in state.alerts:
         text = alert.text
-        color = (255, 255, 255)
-        font = pygame.font.SysFont("Arial", 12)
+        color = getattr(alert, "color", (255, 255, 255))
+        font = pygame.font.SysFont("Arial", 18)
 
         font_surface = font.render(text, True, color)
-        graphics.render_surface.blit(font_surface, cursor.to_tuple())
+        graphics.window.blit(font_surface, cursor.to_tuple())
 
         cursor.y += font.get_height()
