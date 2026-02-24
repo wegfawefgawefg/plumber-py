@@ -50,6 +50,14 @@ class Entity:
         self.hp = 1
         self.invincible = False
 
+        # per-physics-step contact summary
+        self.blocked_left = False
+        self.blocked_right = False
+        self.blocked_up = False
+        self.blocked_down = False
+        self.touching_entities = []
+        self.touching_tiles = []
+
         # optional components
         self.coyote_timer = None
         self.ai = None

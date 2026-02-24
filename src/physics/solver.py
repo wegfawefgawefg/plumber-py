@@ -6,6 +6,7 @@ from physics.config import (
     MAX_SUBSTEPS_PER_TICK,
     MIN_SUBSTEPS_PER_TICK,
 )
+from physics.contact import reset_entity_contact_summaries
 from physics.entity_solver import resolve_entity_overlaps_on_axis
 from physics.tile_solver import move_entity_along_axis_against_tiles
 
@@ -72,6 +73,7 @@ def _move_axis(state, axis, substeps):
 
 # Fixed-tick simulation step.
 def physics_step(state):
+    reset_entity_contact_summaries(state)
     _integrate_velocities(state)
 
     substeps = _substeps_for_tick(state)

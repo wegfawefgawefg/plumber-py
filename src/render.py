@@ -7,6 +7,8 @@ from graphics import Textures
 from state import Mode
 from tiles import TILE_SIZE, get_tile_texture_sample_position, is_tile_transparent
 
+DEBUG_RENDER_ENTITY_AABBS = True
+
 
 def _lerp_vec2(a, b, alpha):
     return a + (b - a) * alpha
@@ -200,30 +202,18 @@ def render_entites(state, graphics, alpha):
             (render_pos.x, render_pos.y, sample_size.x, sample_size.y),
         )
 
-        # render the entity box
-        # draw a rect to an intermediary surface, then we blit with transparency
-        #   so we can see the entity behind the rect
-        # rect_surface = pygame.Surface(entity.size.to_tuple(), pygame.SRCALPHA)
-        # pygame.draw.rect(
-        #     rect_surface,
-        #     (255, 0, 0),
-        #     (
-        #         0,
-        #         0,
-        #         int(entity.size.x),
-        #         int(entity.size.y),
-        #     ),
-        #     1,
-        # )
-        # graphics.render_surface.blit(
-        #     rect_surface,
-        #     (
-        #         entity.pos.x - cam.pos.x,
-        #         entity.pos.y - cam.pos.y,
-        #         entity.size.x,
-        #         entity.size.y,
-        #     ),
-        # )
+        if DEBUG_RENDER_ENTITY_AABBS:
+            pygame.draw.rect(
+                graphics.render_surface,
+                (255, 0, 0),
+                (
+                    int(entity_pos.x - cam_pos.x),
+                    int(entity_pos.y - cam_pos.y),
+                    int(entity.size.x),
+                    int(entity.size.y),
+                ),
+                1,
+            )
 
         # draw entity feet
         # feet_tl, feet_br = get_entity_feet(entity.pos, entity.size)

@@ -33,6 +33,8 @@ class State:
         self.stage: Stage = None
 
         self.events = []
+        self.physics_events = []
+        self._physics_event_keys = set()
         self.special_effects = []
 
         self.debug_messages: list[str] = []
@@ -46,6 +48,10 @@ class State:
 
     def step_alerts(self):
         self.alerts = step_and_cleanse(self.alerts)
+
+    def reset_physics_events(self):
+        self.physics_events.clear()
+        self._physics_event_keys.clear()
 
     def set_active_entities(self, camera):
         self.active_entities.clear()

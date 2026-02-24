@@ -2,6 +2,7 @@ import math
 
 import glm
 
+from physics.contact import mark_blocked_for_delta, register_tile_contacts
 from physics.config import POSITION_EPSILON
 from tiles import TILE_SIZE, is_tile_collidable
 
@@ -67,4 +68,7 @@ def move_entity_along_axis_against_tiles(state, entity, axis, delta):
     actual = next_pos - old
     blocked = abs((actual.x if axis == "x" else actual.y) - delta) > POSITION_EPSILON
     entity.pos = next_pos
+    if blocked:
+        mark_blocked_for_delta(entity, axis, delta)
+    register_tile_contacts(state, entity, axis, delta, collided)
     return actual.x if axis == "x" else actual.y, blocked

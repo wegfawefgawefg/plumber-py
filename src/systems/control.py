@@ -88,6 +88,13 @@ def speed_limit_controlled_entities(state):
 
     for e in controllable_entities:
         if e.input_controlled:
+            # If input direction flips while pinned against a blocker, clear stale
+            # opposite velocity immediately so control response feels snappy.
+            if state.inputs.left and e.vel.x > 0 and e.blocked_right:
+                e.vel.x = 0.0
+            if state.inputs.right and e.vel.x < 0 and e.blocked_left:
+                e.vel.x = 0.0
+
             if state.inputs.right:
                 if state.inputs.run:
                     e.vel.x = min(e.vel.x, RUNNER_MAX_SPEED)

@@ -23,12 +23,16 @@ def gravity(state):
 
 
 def set_grounded(state):
-    # clear grounded
+    # Primary source of truth: last physics-step contact summary.
     for e in state.active_entities:
-        e.grounded = False
+        e.grounded = e.blocked_down
 
-    # find who is grounded
+    # Fallback probe path for cases before first physics step or when contact
+    # summaries are unavailable.
     for e in state.active_entities:
+        if e.grounded:
+            continue
+
         feet_tl, feet_br = get_entity_feet(e.pos, e.size)
 
         # check stage floor

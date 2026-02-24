@@ -123,8 +123,32 @@ class ChangeDirectionWhenImpeded(AI):
             (WalkLeftOrRight.WALK_LEFT, WalkLeftOrRight.WALK_RIGHT)
         )
         self.old_positions = []
+        self.had_front_contact_last_frame = False
+
+    def _has_contact_on_side(self, entity, side: str) -> bool:
+        for _, _, touch_side in entity.touching_entities:
+            if touch_side == side:
+                return True
+        for _, touch_side in entity.touching_tiles:
+            if touch_side == side:
+                return True
+        return False
 
     def step(self, entity, state, graphics, audio):
+        # Steering trigger: front-side contact start.
+        front_contact_now = False
+        if self.mode == WalkLeftOrRight.WALK_LEFT:
+            front_contact_now = self._has_contact_on_side(entity, "left")
+            if front_contact_now and not self.had_front_contact_last_frame:
+                self.mode = WalkLeftOrRight.WALK_RIGHT
+                self.old_positions.clear()
+        elif self.mode == WalkLeftOrRight.WALK_RIGHT:
+            front_contact_now = self._has_contact_on_side(entity, "right")
+            if front_contact_now and not self.had_front_contact_last_frame:
+                self.mode = WalkLeftOrRight.WALK_LEFT
+                self.old_positions.clear()
+
+        # Fallback for edge cases where blocked flags are unavailable.
         if len(self.old_positions) > 2:
             self.old_positions.pop(0)
         self.old_positions.append(int(entity.pos.x))
@@ -145,6 +169,8 @@ class ChangeDirectionWhenImpeded(AI):
                     case WalkLeftOrRight.WALK_RIGHT:
                         self.mode = WalkLeftOrRight.WALK_LEFT
                 self.old_positions.clear()
+
+        self.had_front_contact_last_frame = front_contact_now
 
         match self.mode:
             case WalkLeftOrRight.WALK_LEFT:

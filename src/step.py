@@ -94,6 +94,7 @@ def step(state, graphics, audio):
     state.step_alerts()
     state.debug_messages.clear()
     state.events.clear()
+    state.reset_physics_events()
 
     match state.mode:
         case Mode.PLAYING:
