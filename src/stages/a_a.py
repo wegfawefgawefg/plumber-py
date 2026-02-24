@@ -42,10 +42,27 @@ def _enclosed_arena_tiles(width_tiles, height_tiles):
     return tiles
 
 
-def _spawn_goomba_swarm(stage, width_tiles, height_tiles):
-    for ty in range(2, height_tiles - 2, 2):
-        for tx in range(5, width_tiles - 2, 2):
-            stage.entities.append(goomba_template(glm.vec2(tx, ty)))
+def _spawn_test_entities(stage):
+    # Anchor target: heavy/large body that cannot be pushed or squished.
+    goombor = goombor_template(glm.vec2(17, 12))
+    goombor.can_be_pushed = False
+    goombor.can_be_squished = False
+    goombor.facing = Facing.LEFT
+    stage.entities.append(goombor)
+
+    # Mid-size pushers: can push and can also be squished.
+    for tile_pos in (glm.vec2(9, 12), glm.vec2(11, 12), glm.vec2(13, 12)):
+        goombini = goombini_template(tile_pos)
+        goombini.can_push_entities = True
+        goombini.can_be_pushed = True
+        goombini.can_be_squished = True
+        stage.entities.append(goombini)
+
+    # Standard goomba: pushable and squishable.
+    goomba = goomba_template(glm.vec2(15, 12))
+    goomba.can_be_pushed = True
+    goomba.can_be_squished = True
+    stage.entities.append(goomba)
 
 
 def a_a():
@@ -59,7 +76,7 @@ def a_a():
     player = player_template()
     player.pos = glm.vec2(2 * TILE_SIZE, 2 * TILE_SIZE)
     stage.entities.append(player)
-    _spawn_goomba_swarm(stage, TEST_ARENA_WIDTH_TILES, TEST_ARENA_HEIGHT_TILES)
+    _spawn_test_entities(stage)
 
     ####    EXITS   ####
     # stage.add_exit(glm.ivec2(15, 7), Stages.A_A, level_win=True)

@@ -43,6 +43,11 @@ class Entity:
         self.has_entity_collisions = True
         self.can_push_entities = False
         self.can_be_pushed = False
+        self.can_be_squished = False
+        self.can_crush_left = False
+        self.can_crush_right = False
+        self.can_crush_up = False
+        self.can_crush_down = False
         self.grounded = False
         self.always_active = False
         self.is_sticky_platform = (

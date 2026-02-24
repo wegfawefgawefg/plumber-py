@@ -60,16 +60,43 @@ def _full_displacement_targets(axis, a, b, overlap, a_dir, b_dir):
     b_pushes_a = b.can_push_entities and a.can_be_pushed
 
     if a_pushes_b and not b_pushes_a:
-        return 0.0, b_dir * overlap
+        return 0.0, b_dir * overlap, a, b, a_dir
     if b_pushes_a and not a_pushes_b:
-        return a_dir * overlap, 0.0
+        return a_dir * overlap, 0.0, b, a, b_dir
 
     # If both can push each other, choose a single pusher by larger axis speed.
     a_axis_speed = abs(a.vel.x) if axis == "x" else abs(a.vel.y)
     b_axis_speed = abs(b.vel.x) if axis == "x" else abs(b.vel.y)
     if a_axis_speed >= b_axis_speed:
-        return 0.0, b_dir * overlap
-    return a_dir * overlap, 0.0
+        return 0.0, b_dir * overlap, a, b, a_dir
+    return a_dir * overlap, 0.0, b, a, b_dir
+
+
+def _crush_entity(entity):
+    entity.hp = 0
+    entity.ai = None
+    entity.vel.x = 0.0
+    entity.vel.y = 0.0
+    entity.acc.x = 0.0
+    entity.acc.y = 0.0
+    entity.has_entity_collisions = False
+    entity.can_push_entities = False
+    entity.can_be_pushed = False
+
+
+def _can_crush_in_direction(pusher, axis, pushee_target):
+    if axis == "x":
+        if pushee_target > POSITION_EPSILON:
+            return pusher.can_crush_right
+        if pushee_target < -POSITION_EPSILON:
+            return pusher.can_crush_left
+        return False
+
+    if pushee_target > POSITION_EPSILON:
+        return pusher.can_crush_down
+    if pushee_target < -POSITION_EPSILON:
+        return pusher.can_crush_up
+    return False
 
 
 def _candidate_pair_indices(collidable):
@@ -146,7 +173,7 @@ def resolve_entity_overlaps_on_axis(state, axis):
 
             a_dir, b_dir = _axis_separation_directions(a, b, axis)
             register_entity_contact(state, a, b, axis, a_dir, b_dir)
-            a_target, b_target = _full_displacement_targets(
+            a_target, b_target, pusher, pushee, pusher_dir = _full_displacement_targets(
                 axis, a, b, overlap, a_dir, b_dir
             )
 
@@ -172,6 +199,36 @@ def resolve_entity_overlaps_on_axis(state, axis):
                 else:
                     b.pos.y += b_target
 
+            a_blocked = abs(a_target - a_moved) > POSITION_EPSILON
+            b_blocked = abs(b_target - b_moved) > POSITION_EPSILON
+            pushee_blocked = (pushee is a and a_blocked) or (pushee is b and b_blocked)
+            pushee_target = a_target if pushee is a else b_target
+
+            if pushee_blocked:
+                if pushee.can_be_squished and _can_crush_in_direction(
+                    pusher, axis, pushee_target
+                ):
+                    _crush_entity(pushee)
+                    continue
+
+                remaining = _axis_overlap(a, b, axis)
+                if remaining > POSITION_EPSILON:
+                    reject_delta = pusher_dir * remaining
+                    if pusher.has_tile_collisions:
+                        move_entity_along_axis_against_tiles(
+                            state, pusher, axis, reject_delta
+                        )
+                    else:
+                        if axis == "x":
+                            pusher.pos.x += reject_delta
+                        else:
+                            pusher.pos.y += reject_delta
+
+                if axis == "x":
+                    pusher.vel.x = 0.0
+                else:
+                    pusher.vel.y = 0.0
+
             # Preserve horizontal momentum for entity-entity contacts to keep
             # pushing behavior natural. Vertical velocity is still canceled
             # when penetrating into another body so gravity doesn't accumulate
@@ -181,8 +238,8 @@ def resolve_entity_overlaps_on_axis(state, axis):
 
             # Still kill axis velocity when depenetration against tiles blocks
             # the intended correction.
-            a_tile_blocked = abs(a_target - a_moved) > POSITION_EPSILON
-            b_tile_blocked = abs(b_target - b_moved) > POSITION_EPSILON
+            a_tile_blocked = a_blocked
+            b_tile_blocked = b_blocked
             if axis == "x":
                 if a_tile_blocked:
                     a.vel.x = 0.0
