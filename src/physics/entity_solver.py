@@ -1,17 +1,9 @@
 from physics.config import (
-    DEFAULT_ENTITY_WEIGHT,
     ENTITY_DEPENETRATION_ITERATIONS,
-    ENTITY_WEIGHTS,
     POSITION_EPSILON,
 )
 from physics.contact import register_entity_contact
 from physics.tile_solver import move_entity_along_axis_against_tiles
-
-
-def _get_weight(entity):
-    if entity.type in ENTITY_WEIGHTS:
-        return ENTITY_WEIGHTS[entity.type]
-    return DEFAULT_ENTITY_WEIGHT
 
 
 def _axis_overlap(a, b, axis):
@@ -29,12 +21,6 @@ def _axis_overlap(a, b, axis):
     return min(a_max, b_max) - max(a_min, b_min)
 
 
-def _aabb_overlap(a, b):
-    ox = _axis_overlap(a, b, "x")
-    oy = _axis_overlap(a, b, "y")
-    return ox > 0.0 and oy > 0.0
-
-
 def _axis_separation_directions(a, b, axis):
     if axis == "x":
         a_center = a.pos.x + a.size.x * 0.5
@@ -46,18 +32,6 @@ def _axis_separation_directions(a, b, axis):
     if a_center <= b_center:
         return -1.0, 1.0
     return 1.0, -1.0
-
-
-def _weight_split(a, b):
-    w_a = max(_get_weight(a), POSITION_EPSILON)
-    w_b = max(_get_weight(b), POSITION_EPSILON)
-
-    inv_a = 1.0 / w_a
-    inv_b = 1.0 / w_b
-    total = inv_a + inv_b
-    if total <= POSITION_EPSILON:
-        return 0.5, 0.5
-    return inv_a / total, inv_b / total
 
 
 def _zero_velocity_into_entity_contact(axis, entity, separation_dir):
@@ -83,17 +57,25 @@ def resolve_entity_overlaps_on_axis(state, axis):
                 a = collidable[i]
                 b = collidable[j]
 
-                if not _aabb_overlap(a, b):
+                ox = _axis_overlap(a, b, "x")
+                oy = _axis_overlap(a, b, "y")
+                if ox <= 0.0 or oy <= 0.0:
                     continue
 
+                if axis == "x":
+                    if ox > oy + POSITION_EPSILON:
+                        continue
+                    overlap = ox
+                else:
+                    if oy > ox + POSITION_EPSILON:
+                        continue
+                    overlap = oy
+
                 any_overlap = True
-                overlap = _axis_overlap(a, b, axis)
-                if overlap <= 0.0:
-                    continue
 
                 a_dir, b_dir = _axis_separation_directions(a, b, axis)
                 register_entity_contact(state, a, b, axis, a_dir, b_dir)
-                a_share, b_share = _weight_split(a, b)
+                a_share, b_share = 0.5, 0.5
                 # For entity-entity contacts we resolve to exact touching.
                 # Adding epsilon here creates a tiny physical gap that can
                 # rasterize as a visible 1px hover at render time.
