@@ -1,6 +1,9 @@
 # plumber-py
 mayro in python, scraping some splonks code
 
+![screenshot](image.png)
+
+
 
 ## resources
 - https://nesmaps.com/maps/SuperMarioBrothers/SuperMarioBrothers.html
